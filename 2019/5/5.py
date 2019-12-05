@@ -1,14 +1,18 @@
 from enum import IntEnum
 
 class IntcodeOpcode(IntEnum):
-    STOP = 99
-    ADD  =  1
-    MULT =  2
+    STOP   = 99
+    ADD    =  1
+    MULT   =  2
+    INPUT  =  3
+    OUTPUT =  4
 
 class Intcode:
 
     def __init__(self):
         self._memory = None
+        self._input = None
+        self._output = None
         
     def reset(self, opcodes):
         self._memory = opcodes.copy()
@@ -22,9 +26,19 @@ class Intcode:
         while(True):
             opcode = self._memory[pc]
             if   opcode == IntcodeOpcode.STOP: return self._memory[0]
-            elif opcode == IntcodeOpcode.ADD:  pc = self._opcode_add(pc)
-            elif opcode == IntcodeOpcode.MULT: pc = self._opcode_mult(pc)
+            elif opcode == IntcodeOpcode.ADD:    pc = self._opcode_add(pc)
+            elif opcode == IntcodeOpcode.MULT:   pc = self._opcode_mult(pc)
+            elif opcode == IntcodeOpcode.INPUT:  pc = self._opcode_input(pc)
+            elif opcode == IntcodeOpcode.OUTPUT: pc = self._opcode_output(pc)
             else: raise Exception("Bad opcode (%d)!" % opcode)
+
+    def set_input(self, value):
+        self._input = value
+        
+    def get_output(self):
+        if self._output is None:
+            raise Exception("get_output() failed, since _output is None!")
+        return self._output
 
     def _opcode_add(self, pc):
         ptr_a = self._memory[pc+1]
@@ -45,7 +59,20 @@ class Intcode:
         p = a * b
         self._memory[ptr_p] = p
         return pc + 4
-    
+        
+    def _opode_input(self, pc):
+        if self._input is None:
+            raise("_opcode_input() failed, since _input is None!")
+        ptr = self._memory[pc+1]
+        self._memory[ptr] = _input
+        return pc + 2
+        
+    def _opcode_output(self, pc):
+        ptr = self._memory[pc+1]
+        self._output = self._memory[ptr]
+        return pc + 2
+
+
 def load_opcodes(filename):
     opcodes = list()
     with open(filename) as f:
