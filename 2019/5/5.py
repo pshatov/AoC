@@ -12,10 +12,12 @@ class Intcode:
     def __init__(self):
         self._memory = None
         self._input = None
-        self._output = None
+        self._output = []
         
     def reset(self, opcodes):
         self._memory = opcodes.copy()
+        self._input = None
+        self._output = []
         
     def run(self, opcodes=None):
     
@@ -36,42 +38,39 @@ class Intcode:
         self._input = value
         
     def get_output(self):
-        if self._output is None:
-            raise Exception("get_output() failed, since _output is None!")
         return self._output
 
     def _opcode_add(self, pc):
-        ptr_a = self._memory[pc+1]
-        ptr_b = self._memory[pc+2]
-        ptr_s = self._memory[pc+3]
-        a = self._memory[ptr_a]
-        b = self._memory[ptr_b]
-        s = a + b
-        self._memory[ptr_s] = s
+        #ptr_a = self._memory[pc+1]
+        #ptr_b = self._memory[pc+2]
+        #ptr_s = self._memory[pc+3]
+        #a = self._memory[ptr_a]
+        #b = self._memory[ptr_b]
+        #s = a + b
+        #self._memory[ptr_s] = s
         return pc + 4
         
     def _opcode_mult(self, pc):
-        ptr_a = self._memory[pc+1]
-        ptr_b = self._memory[pc+2]
-        ptr_p = self._memory[pc+3]
-        a = self._memory[ptr_a]
-        b = self._memory[ptr_b]
-        p = a * b
-        self._memory[ptr_p] = p
+        #ptr_a = self._memory[pc+1]
+        #ptr_b = self._memory[pc+2]
+        #ptr_p = self._memory[pc+3]
+        #a = self._memory[ptr_a]
+        #b = self._memory[ptr_b]
+        #p = a * b
+        #self._memory[ptr_p] = p
         return pc + 4
         
     def _opode_input(self, pc):
-        if self._input is None:
-            raise("_opcode_input() failed, since _input is None!")
-        ptr = self._memory[pc+1]
-        self._memory[ptr] = _input
+        #if self._input is None:
+        #    raise("_opcode_input() failed, since _input is None!")
+        #ptr = self._memory[pc+1]
+        #self._memory[ptr] = _input
         return pc + 2
         
     def _opcode_output(self, pc):
-        ptr = self._memory[pc+1]
-        self._output = self._memory[ptr]
+        #ptr = self._memory[pc+1]
+        #self._output = self._memory[ptr]
         return pc + 2
-
 
 def load_opcodes(filename):
     opcodes = list()
@@ -82,18 +81,7 @@ def load_opcodes(filename):
             if len(line_part) > 0:
                 opcodes.append(int(line_part))
     return opcodes
-    
-def find_xy(cpu, opcodes, target):
-    for x in range(100):
-        for y in range(100):
-            opcodes_try = opcodes.copy()
-            opcodes_try[1] = x
-            opcodes_try[2] = y
-            ret = cpu.run(opcodes_try)
-            if ret == target: return (x, y)
-        print(".", end='')
-        if x % 10 == 9: print("")
-    
+
 def main():
     cpu = Intcode()
     opcodes = load_opcodes('input.txt')
