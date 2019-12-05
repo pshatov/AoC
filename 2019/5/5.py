@@ -108,23 +108,18 @@ class Intcode:
         self._memory[c_addr] = c
         self._step_pc(IntcodeInstr.MULT)
         
-    # def _opode_input(self, pc):
-
-        # ???
-
-        # #if self._input is None:
-        # #    raise("_opcode_input() failed, since _input is None!")
-        # #ptr = self._memory[pc+1]
-        # #self._memory[ptr] = _input
-        # return pc + 2
+    def _handler_instr_input(self):
+        if self._input is None:
+            raise Exception("_handler_opode_input() failed, since _input is None!")
+        ptr = self._mem_at_pc_index(1)
+        self._memory[ptr] = self._input
+        self._step_pc(IntcodeInstr.INPUT)
         
-    # def _opcode_output(self, pc):
-        
-        # ???
-        
-        # #ptr = self._memory[pc+1]
-        # #self._output = self._memory[ptr]
-        # return pc + 2
+    def _handler_instr_output(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        a = self._get_param(1, a_mode)
+        self._output.append(a)
+        self._step_pc(IntcodeInstr.OUTPUT)
 
 def load_opcodes(filename):
     opcodes = list()
@@ -136,35 +131,33 @@ def load_opcodes(filename):
                 opcodes.append(int(line_part))
     return opcodes
 
-def find_xy(cpu, opcodes, target):
-    for x in range(100):
-        for y in range(100):
-            opcodes_try = opcodes.copy()
-            opcodes_try[1] = x
-            opcodes_try[2] = y
-            cpu.reset(opcodes_try)
-            ret = cpu.run()
-            if ret == target: return (x, y)
-        print(".", end='')
-        if x % 10 == 9: print("")
+def check_codes(codes):
+    ok = True
+    num = len(codes)
+    print("Number of output codes: %d" % num)
+    for i in range(num):
+        j = i + 1
+        code = codes[i]
+        if j < num:  code_ok = code == 0
+        if j == num: code_ok = code != 0
+        if code_ok: ok_str = "OK"
+        else:       ok_str = "??"
+        print("#%02d: [%s] %d " % (j, ok_str, code))
+        if not code_ok: ok = False
+    return ok
 
 def main():
     cpu = Intcode()
     opcodes = load_opcodes('input.txt')
 
-    opcodes_patch = opcodes.copy()
-    opcodes_patch[1] = 12
-    opcodes_patch[2] = 2
-    
-    cpu.reset(opcodes_patch)
+    cpu.reset(opcodes)
+    cpu.set_input(1)
     result = cpu.run()
+    codes = cpu.get_output()
     
-    print("%d" % result)
+    if not check_codes(codes): return
     
-    (x, y) = find_xy(cpu, opcodes, 19690720)
-    z = x * 100 + y
-    
-    print("noun = %d, verb = %d (%d)" % (x, y, z))
+
 
 
 if __name__ == "__main__":
