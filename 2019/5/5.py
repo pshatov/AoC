@@ -212,18 +212,32 @@ def check_codes(codes):
         print("#%02d: [%s] %d " % (j, ok_str, code))
         if not code_ok: ok = False
     return ok
+    
+def print_codes(codes):
+    num = len(codes)
+    print("Number of output codes: %d" % num)
+    for i in range(num):
+        j = i + 1
+        code = codes[i]
+        print("#%02d: %d " % (j, code))
 
 def main():
     cpu = Intcode()
     opcodes = load_opcodes('input.txt')
 
     cpu.reset(opcodes)
-    cpu.set_input(5)
+    cpu.set_input(1)
     result = cpu.run()
     codes = cpu.get_output()
     
     if not check_codes(codes): return
 
+    cpu.reset(opcodes)
+    cpu.set_input(5)
+    result = cpu.run()
+    codes = cpu.get_output()
+    
+    print_codes(codes)
 
 
 if __name__ == "__main__":
