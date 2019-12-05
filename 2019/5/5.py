@@ -1,76 +1,130 @@
 from enum import IntEnum
 
-class IntcodeOpcode(IntEnum):
+class IntcodeInstr(IntEnum):
     STOP   = 99
     ADD    =  1
     MULT   =  2
     INPUT  =  3
     OUTPUT =  4
 
+class IntcodeParamMode(IntEnum):
+    POSITION  = 0
+    IMMEDIATE = 1
+
 class Intcode:
 
     def __init__(self):
+        self._pc = 0
         self._memory = None
         self._input = None
         self._output = []
         
     def reset(self, opcodes):
+        self._pc = 0
         self._memory = opcodes.copy()
         self._input = None
         self._output = []
         
-    def run(self, opcodes=None):
-    
-        if not opcodes is None:
-            self.reset(opcodes)
-                
-        pc = 0
+    def run(self):
         while(True):
-            opcode = self._memory[pc]
-            if   opcode == IntcodeOpcode.STOP: return self._memory[0]
-            elif opcode == IntcodeOpcode.ADD:    pc = self._opcode_add(pc)
-            elif opcode == IntcodeOpcode.MULT:   pc = self._opcode_mult(pc)
-            elif opcode == IntcodeOpcode.INPUT:  pc = self._opcode_input(pc)
-            elif opcode == IntcodeOpcode.OUTPUT: pc = self._opcode_output(pc)
-            else: raise Exception("Bad opcode (%d)!" % opcode)
+            instr = self._decode_opcode_instr()
+            if   instr == IntcodeInstr.STOP: return self._memory[0]
+            elif instr == IntcodeInstr.ADD:    self._handler_instr_add()
+            elif instr == IntcodeInstr.MULT:   self._handler_instr_mult()
+            elif instr == IntcodeInstr.INPUT:  self._handler_instr_input()
+            elif instr == IntcodeInstr.OUTPUT: self._handler_instr_output()
+            else: raise Exception("Unknown instruction (%d)!" % instr)
+
+    def _mem_at_pc(self):
+        return self._memory[self._pc]
+
+    def _mem_at_pc_index(self, index):
+        return self._memory[self._pc+index]
 
     def set_input(self, value):
         self._input = value
-        
-    def get_output(self):
-        return self._output
 
-    def _opcode_add(self, pc):
-        #ptr_a = self._memory[pc+1]
-        #ptr_b = self._memory[pc+2]
-        #ptr_s = self._memory[pc+3]
-        #a = self._memory[ptr_a]
-        #b = self._memory[ptr_b]
-        #s = a + b
-        #self._memory[ptr_s] = s
-        return pc + 4
+    def get_output(self):
+        return self._output            
+
+    def _decode_opcode_instr(self):
+        opcode = self._mem_at_pc()
+        if opcode < 0:
+            raise Exception("Bad opcode (%d)!" % opcode)
+        instr = opcode % 100
+        return instr
+
+    def _decode_opcode_param_mode(self, index):
+        opcode = self._mem_at_pc()
+        opcode //= 100
+        for i in range(1, index):
+            opcode //= 10
+        mode = opcode % 10
+        return mode
+    
+    def _get_param(self, index, mode):
+        mem_value = self._mem_at_pc_index(index)
+        if   mode == IntcodeParamMode.POSITION:  return self._memory[mem_value]
+        elif mode == IntcodeParamMode.IMMEDIATE: return mem_value
+        else: raise Exception("Unknown parameter mode (%d)!" % mode)
+
+    def _step_pc(self, instr):
+        if   instr == IntcodeInstr.ADD:    self._pc += 4
+        elif instr == IntcodeInstr.MULT:   self._pc += 4
+        elif instr == IntcodeInstr.INPUT:  self._pc += 2
+        elif instr == IntcodeInstr.OUTPUT: self._pc += 2
+
+    def _handler_instr_add(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        b_mode = self._decode_opcode_param_mode(2)
+        c_mode = self._decode_opcode_param_mode(3)
         
-    def _opcode_mult(self, pc):
-        #ptr_a = self._memory[pc+1]
-        #ptr_b = self._memory[pc+2]
-        #ptr_p = self._memory[pc+3]
-        #a = self._memory[ptr_a]
-        #b = self._memory[ptr_b]
-        #p = a * b
-        #self._memory[ptr_p] = p
-        return pc + 4
+        if c_mode != IntcodeParamMode.POSITION:
+            raise Exception("_handler_instr_add() failed, since c_mode is %d!" % c_mode)
         
-    def _opode_input(self, pc):
-        #if self._input is None:
-        #    raise("_opcode_input() failed, since _input is None!")
-        #ptr = self._memory[pc+1]
-        #self._memory[ptr] = _input
-        return pc + 2
+        a = self._get_param(1, a_mode)
+        b = self._get_param(2, b_mode)
+        c = a + b
         
-    def _opcode_output(self, pc):
-        #ptr = self._memory[pc+1]
-        #self._output = self._memory[ptr]
-        return pc + 2
+        c_addr = self._mem_at_pc_index(3)
+
+        self._memory[c_addr] = c
+        self._step_pc(IntcodeInstr.ADD)
+        
+    def _handler_instr_mult(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        b_mode = self._decode_opcode_param_mode(2)
+        c_mode = self._decode_opcode_param_mode(3)
+        
+        if c_mode != IntcodeParamMode.POSITION:
+            raise Exception("_handler_instr_mult() failed, since c_mode is %d!" % c_mode)
+        
+        a = self._get_param(1, a_mode)
+        b = self._get_param(2, b_mode)
+        c = a * b
+        
+        c_addr = self._mem_at_pc_index(3)
+
+        self._memory[c_addr] = c
+        self._step_pc(IntcodeInstr.MULT)
+        
+    # def _opode_input(self, pc):
+
+        # ???
+
+        # #if self._input is None:
+        # #    raise("_opcode_input() failed, since _input is None!")
+        # #ptr = self._memory[pc+1]
+        # #self._memory[ptr] = _input
+        # return pc + 2
+        
+    # def _opcode_output(self, pc):
+        
+        # ???
+        
+        # #ptr = self._memory[pc+1]
+        # #self._output = self._memory[ptr]
+        # return pc + 2
 
 def load_opcodes(filename):
     opcodes = list()
@@ -81,6 +135,18 @@ def load_opcodes(filename):
             if len(line_part) > 0:
                 opcodes.append(int(line_part))
     return opcodes
+
+def find_xy(cpu, opcodes, target):
+    for x in range(100):
+        for y in range(100):
+            opcodes_try = opcodes.copy()
+            opcodes_try[1] = x
+            opcodes_try[2] = y
+            cpu.reset(opcodes_try)
+            ret = cpu.run()
+            if ret == target: return (x, y)
+        print(".", end='')
+        if x % 10 == 9: print("")
 
 def main():
     cpu = Intcode()
