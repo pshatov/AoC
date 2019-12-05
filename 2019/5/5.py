@@ -1,11 +1,15 @@
 from enum import IntEnum
 
 class IntcodeInstr(IntEnum):
-    STOP   = 99
-    ADD    =  1
-    MULT   =  2
-    INPUT  =  3
-    OUTPUT =  4
+    STOP      = 99
+    ADD       =  1
+    MULT      =  2
+    INPUT     =  3
+    OUTPUT    =  4
+    JMP_TRUE  =  5
+    JMP_FALSE =  6
+    CMP_LT    =  7
+    CMP_EQ    =  8
 
 class IntcodeParamMode(IntEnum):
     POSITION  = 0
@@ -29,10 +33,14 @@ class Intcode:
         while(True):
             instr = self._decode_opcode_instr()
             if   instr == IntcodeInstr.STOP: return self._memory[0]
-            elif instr == IntcodeInstr.ADD:    self._handler_instr_add()
-            elif instr == IntcodeInstr.MULT:   self._handler_instr_mult()
-            elif instr == IntcodeInstr.INPUT:  self._handler_instr_input()
-            elif instr == IntcodeInstr.OUTPUT: self._handler_instr_output()
+            elif instr == IntcodeInstr.ADD:       self._handler_instr_add()
+            elif instr == IntcodeInstr.MULT:      self._handler_instr_mult()
+            elif instr == IntcodeInstr.INPUT:     self._handler_instr_input()
+            elif instr == IntcodeInstr.OUTPUT:    self._handler_instr_output()
+            elif instr == IntcodeInstr.JMP_TRUE:  self._handler_instr_jmp_true()
+            elif instr == IntcodeInstr.JMP_FALSE: self._handler_instr_jmp_false()
+            elif instr == IntcodeInstr.CMP_LT:    self._handler_instr_cmp_lt()
+            elif instr == IntcodeInstr.CMP_EQ:    self._handler_instr_cmp_eq()
             else: raise Exception("Unknown instruction (%d)!" % instr)
 
     def _mem_at_pc(self):
@@ -69,10 +77,15 @@ class Intcode:
         else: raise Exception("Unknown parameter mode (%d)!" % mode)
 
     def _step_pc(self, instr):
-        if   instr == IntcodeInstr.ADD:    self._pc += 4
-        elif instr == IntcodeInstr.MULT:   self._pc += 4
-        elif instr == IntcodeInstr.INPUT:  self._pc += 2
-        elif instr == IntcodeInstr.OUTPUT: self._pc += 2
+        if   instr == IntcodeInstr.ADD:       self._pc += 4
+        elif instr == IntcodeInstr.MULT:      self._pc += 4
+        elif instr == IntcodeInstr.INPUT:     self._pc += 2
+        elif instr == IntcodeInstr.OUTPUT:    self._pc += 2
+        elif instr == IntcodeInstr.JMP_TRUE:  self._pc += 3
+        elif instr == IntcodeInstr.JMP_FALSE: self._pc += 3
+        elif instr == IntcodeInstr.CMP_LT:    self._pc += 4
+        elif instr == IntcodeInstr.CMP_EQ:    self._pc += 4
+        else: raise Exception("_step_pc(): Unknown instr (%d)!" % instr)
 
     def _handler_instr_add(self):
         a_mode = self._decode_opcode_param_mode(1)
@@ -121,6 +134,60 @@ class Intcode:
         self._output.append(a)
         self._step_pc(IntcodeInstr.OUTPUT)
 
+    def _handler_instr_jmp_true(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        b_mode = self._decode_opcode_param_mode(2)
+        
+        a = self._get_param(1, a_mode)
+        b = self._get_param(2, b_mode)
+        
+        if a != 0: self._pc = b
+        else: self._step_pc(IntcodeInstr.JMP_TRUE)
+
+    def _handler_instr_jmp_false(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        b_mode = self._decode_opcode_param_mode(2)
+        
+        a = self._get_param(1, a_mode)
+        b = self._get_param(2, b_mode)
+        
+        if a == 0: self._pc = b
+        else: self._step_pc(IntcodeInstr.JMP_FALSE)
+
+    def _handler_instr_cmp_lt(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        b_mode = self._decode_opcode_param_mode(2)
+        c_mode = self._decode_opcode_param_mode(3)
+        
+        if c_mode != IntcodeParamMode.POSITION:
+            raise Exception("_handler_instr_cmp_lt() failed, since c_mode is %d!" % c_mode)
+        
+        a = self._get_param(1, a_mode)
+        b = self._get_param(2, b_mode)
+        c = 1 if a < b else 0
+        
+        c_addr = self._mem_at_pc_index(3)
+
+        self._memory[c_addr] = c
+        self._step_pc(IntcodeInstr.CMP_LT)
+
+    def _handler_instr_cmp_eq(self):
+        a_mode = self._decode_opcode_param_mode(1)
+        b_mode = self._decode_opcode_param_mode(2)
+        c_mode = self._decode_opcode_param_mode(3)
+        
+        if c_mode != IntcodeParamMode.POSITION:
+            raise Exception("_handler_instr_cmp_lt() failed, since c_mode is %d!" % c_mode)
+        
+        a = self._get_param(1, a_mode)
+        b = self._get_param(2, b_mode)
+        c = 1 if a == b else 0
+        
+        c_addr = self._mem_at_pc_index(3)
+
+        self._memory[c_addr] = c
+        self._step_pc(IntcodeInstr.CMP_LT)
+
 def load_opcodes(filename):
     opcodes = list()
     with open(filename) as f:
@@ -151,12 +218,11 @@ def main():
     opcodes = load_opcodes('input.txt')
 
     cpu.reset(opcodes)
-    cpu.set_input(1)
+    cpu.set_input(5)
     result = cpu.run()
     codes = cpu.get_output()
     
     if not check_codes(codes): return
-    
 
 
 
