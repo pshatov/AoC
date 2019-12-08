@@ -42,3 +42,23 @@ ones_count = layer_count_ones(layer_data[min_zeros_index])
 twos_count = layer_count_twos(layer_data[min_zeros_index])
 
 print("ones_count * twos_count = %d * %d = %d" % (ones_count, twos_count, ones_count * twos_count))
+
+render_data = []
+for y in range(img_h):
+    for x in range(img_w):
+        t = y * img_w + x
+        pixel_color = "2"
+        for z in range(img_num_layers):
+            if layer_data[z][t] != "2":
+                pixel_color = layer_data[z][t]
+                break
+        render_data.append(pixel_color)
+
+z = 0
+for y in range(img_h):
+    for x in range(img_w):
+        pixel_color = render_data[z]
+        if pixel_color == "0": pixel_color = " "
+        print(pixel_color, end='')
+        z += 1
+    print("")
