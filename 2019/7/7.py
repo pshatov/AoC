@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import Enum, IntEnum, auto
 
 class IntcodeInstr(IntEnum):
     STOP      = 99
@@ -15,6 +15,11 @@ class IntcodeParamMode(IntEnum):
     POSITION  = 0
     IMMEDIATE = 1
 
+class IntcodeState(Enum):
+    IDLE       = auto()
+    WAIT_INPUT = auto()
+    STOPPED    = auto()
+
 class Intcode:
 
     def __init__(self):
@@ -22,25 +27,31 @@ class Intcode:
         self._memory = None
         self._input = []
         self._output = []
+        self._state = IntcodeState.IDLE
         
     def reset(self, opcodes):
         self._pc = 0
         self._memory = opcodes.copy()
         self._input = []
         self._output = []
+        self._state = IntcodeState.IDLE
         
     def run(self):
-        while(True):
+        while True:
             instr = self._decode_opcode_instr()
-            if   instr == IntcodeInstr.STOP: return self._memory[0]
-            elif instr == IntcodeInstr.ADD:       self._handler_instr_add()
-            elif instr == IntcodeInstr.MULT:      self._handler_instr_mult()
-            elif instr == IntcodeInstr.INPUT:     self._handler_instr_input()
-            elif instr == IntcodeInstr.OUTPUT:    self._handler_instr_output()
-            elif instr == IntcodeInstr.JMP_TRUE:  self._handler_instr_jmp_true()
+            if   instr == IntcodeInstr.STOP:
+                self._state = IntcodeState.STOPPED
+                return
+            elif instr == IntcodeInstr.ADD: self._handler_instr_add()
+            elif instr == IntcodeInstr.MULT: self._handler_instr_mult()
+            elif instr == IntcodeInstr.INPUT:
+                wait = self._handler_instr_input()
+                if wait: return
+            elif instr == IntcodeInstr.OUTPUT: self._handler_instr_output()
+            elif instr == IntcodeInstr.JMP_TRUE: self._handler_instr_jmp_true()
             elif instr == IntcodeInstr.JMP_FALSE: self._handler_instr_jmp_false()
-            elif instr == IntcodeInstr.CMP_LT:    self._handler_instr_cmp_lt()
-            elif instr == IntcodeInstr.CMP_EQ:    self._handler_instr_cmp_eq()
+            elif instr == IntcodeInstr.CMP_LT: self._handler_instr_cmp_lt()
+            elif instr == IntcodeInstr.CMP_EQ: self._handler_instr_cmp_eq()
             else: raise Exception("Unknown instruction (%d)!" % instr)
 
     def _mem_at_pc(self):
@@ -52,11 +63,17 @@ class Intcode:
     def clear_input(self):
         self._input = []
 
-    def append_input(self, value):
+    def push_input(self, value):
         self._input.append(value)
 
-    def get_output(self):
-        return self._output            
+    def pop_output(self):
+        return self._output.pop(0)
+
+    def is_waiting_input(self):
+        return self._state == IntcodeState.WAIT_INPUT
+
+    def is_stopped(self):
+        return self._state == IntcodeState.STOPPED        
 
     def _decode_opcode_instr(self):
         opcode = self._mem_at_pc()
@@ -126,11 +143,13 @@ class Intcode:
         
     def _handler_instr_input(self):
         if len(self._input) == 0:
-            raise Exception("_handler_opode_input() failed, since _input is empty!")
+            self._state = IntcodeState.WAIT_INPUT
+            return True
         ptr = self._mem_at_pc_index(1)
         value = self._input.pop(0)
         self._memory[ptr] = value
         self._step_pc(IntcodeInstr.INPUT)
+        return False
         
     def _handler_instr_output(self):
         a_mode = self._decode_opcode_param_mode(1)
@@ -202,68 +221,140 @@ def load_opcodes(filename):
                 opcodes.append(int(line_part))
     return opcodes
 
-def calc_vars(array):
-    if len(array) == 1: return [array]
-    ret = []
-    for i in range(len(array)):
-        fix_element = array[i]
-        sub_array = array.copy()
-        sub_array.remove(fix_element)
-        sub_vars = calc_vars(sub_array)
-        for next_sub_var in sub_vars:
-            ret.append([fix_element] + next_sub_var)
-    return ret
-        
-        
-        
+def gen_phase_permuts(phase_set):
     
+    # there's nothing to generate when we only have a single element
+    if len(phase_set) == 1: return [phase_set]
+    
+    # start with an empty list
+    result = []
+    for i in range(len(phase_set)):
+    
+        # fix one of the phases from the set
+        fixed_phase = phase_set[i]
         
+        # generate a subset of all the remaining phases
+        phase_subset = phase_set.copy()
+        phase_subset.remove(fixed_phase)
+        
+        # recursively generate all the permutations of the subset
+        sub_permuts = gen_phase_permuts(phase_subset)
+        
+        # glue our fixed phase to the list of the subset permutations
+        for next_sub_permut in sub_permuts:
+            result.append([fixed_phase] + next_sub_permut)
 
+    # done
+    return result        
+
+def print_phase_permut(phase_permut):
+    for i in range(len(phase_permut)):
+        if i == 0: print("[", end='')
+        else: print(", ", end='')
+        print("%d" % phase_permut[i], end='')
+    if i == (len(phase_permut)-1): print("]: ", end='')
+
+def all_cpus_stopped(cpus):
+    for i in range(len(cpus)):
+        if not cpus[i].is_stopped(): return False
+    return True
+    
 def main():
-    cpu = Intcode()
+
+    # load opcodes
     opcodes = load_opcodes('input.txt')
 
+    # create processor, create phase list
+    cpu = Intcode()
     phases = [0, 1, 2, 3, 4]
-    vars = calc_vars(phases)
-
-    max_pwr = None
-    for next_var in vars:
-        val_in = 0
-        for i in range(len(next_var)):
-            if i == 0: print("[", end='')
-            else: print(", ", end='')
-            print("%d" % next_var[i], end='')
-            if i == (len(next_var)-1): print("]: ", end='')
-            cpu.reset(opcodes)
-            cpu.clear_input()
-            cpu.append_input(next_var[i])
-            cpu.append_input(val_in)
-            cpu.run()
-            val_out = cpu.get_output()
-            val_out = val_out[0]
-            val_in = val_out
-        
-        if max_pwr is None:     max_pwr = val_out
-        elif val_out > max_pwr: max_pwr = val_out
-            
-        print("%d (max: %d)" % (val_out, max_pwr))
     
+    # generate permutations
+    phase_permuts = gen_phase_permuts(phases)
+
+    # find largest achievable power
+    max_pwr = None
+    for next_phase_permut in phase_permuts:
+    
+        print_phase_permut(next_phase_permut)
+    
+        # the very first amplifier's input is 0
+        value_in = 0
+        for i in range(len(next_phase_permut)):
+            
+            # reset cpu
+            cpu.reset(opcodes)
+            
+            # set input parameters (phase and value)
+            cpu.push_input(next_phase_permut[i])
+            cpu.push_input(value_in)
+            
+            # run program
+            cpu.run()
+            
+            # get output value and feed it into the next amplifier
+            value_out = cpu.pop_output()
+            value_in = value_out
+        
+        # store largest seen power
+        if max_pwr is None:       max_pwr = value_out
+        elif value_out > max_pwr: max_pwr = value_out
+            
+        # print intermediate result
+        print("%d (max: %d)" % (value_out, max_pwr))
+    
+    # print final result
     print("max_pwr = %d" % max_pwr)
 
-    #cpu.reset(opcodes)
-    #cpu.set_input(1)
+    # create processors, create phase list
+    cpus = []
+    phases = [5, 6, 7, 8, 9]
     
-    #result = cpu.run()
-    #codes = cpu.get_output()
-    
-    #if not check_codes(codes): return
+    # generate phase permutations, create processors
+    phase_permuts = gen_phase_permuts(phases)
+    for i in range(len(phases)): cpus.append(Intcode())
 
-    #cpu.reset(opcodes)
-    #cpu.set_input(5)
-    #result = cpu.run()
-    #codes = cpu.get_output()
+    # find largest achievable power
+    max_pwr = None
+    for next_phase_permut in phase_permuts:
     
-    #print_codes(codes)
+        print_phase_permut(next_phase_permut)
+    
+        # reset all the processors and feed them with their phase offsets
+        for i in range(len(cpus)):
+            cpus[i].reset(opcodes)
+            cpus[i].push_input(next_phase_permut[i])
+        
+        # the very first input is zero
+        prev_cpu_output = 0
+        
+        # run all the processors until they're stopped
+        cpu_index = 0
+        while True:
+            
+            # set current processor's input
+            cpus[cpu_index].push_input(prev_cpu_output)
+            cpus[cpu_index].run()
+            
+            # the current processor is either stalled due to lack of input
+            # or stopped altogether
+            prev_cpu_output = cpus[cpu_index].pop_output()
+                        
+            # stop once all the loop is finished
+            if all_cpus_stopped(cpus): break
+
+            # goto next processor
+            cpu_index += 1
+            if cpu_index == len(cpus): cpu_index = 0
+
+        # store largest seen power
+        if max_pwr is None:             max_pwr = prev_cpu_output
+        elif prev_cpu_output > max_pwr: max_pwr = prev_cpu_output
+            
+        # print intermediate result
+        print("%d (max: %d)" % (prev_cpu_output, max_pwr))
+    
+    # print final result
+    print("max_pwr = %d" % max_pwr)
 
 
 if __name__ == "__main__":
