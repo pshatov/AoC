@@ -272,10 +272,19 @@ def dir_right(dir):
     if dir == 2: return 3
     if dir == 3: return 0
 
+def handle_turn(dir, out_turn):
+    if out_turn == 0: return dir_left(dir)
+    if out_turn == 1: return dir_right(dir)
+
+def handle_step(x, y, dir):
+    if dir == 0: return x,     y - 1
+    if dir == 1: return x + 1, y
+    if dir == 2: return x,     y + 1
+    if dir == 3: return x - 1, y
+
 def main():
 
-    x = 0
-    y = 0
+    x, y = 0, 0
     dir = 0
     paints = {}
 
@@ -288,40 +297,69 @@ def main():
     while True:
         cpu.run()
         if cpu.is_stopped(): break
-        if not cpu.can_pop_output(): raise Exception("Can't pop color.")
         out_clr = cpu.pop_output()
-        if not cpu.can_pop_output(): raise Exception("Can't pop direction.")
-        out_dir = cpu.pop_output()
-        if cpu.can_pop_output(): raise Exception("Unexpected output.")
+        out_turn = cpu.pop_output()
         
         paints[(x, y)] = out_clr
         
-        if out_dir == 0: dir = dir_left(dir)
-        if out_dir == 1: dir = dir_right(dir)
+        dir = handle_turn(dir, out_turn)
+        x, y = handle_step(x, y, dir)
         
-        if dir == 0: y += 1
-        if dir == 1: x += 1
-        if dir == 2: y -= 1
-        if dir == 3: x -= 1
-        
-        if not (x, y) in paints.keys():
-            cpu.push_input(0)
-        else:
-            cpu.push_input(paints[(x, y)])
+        if not (x, y) in paints.keys(): cpu.push_input(0)
+        else:                           cpu.push_input(paints[(x, y)])
 
     print(len(paints))
 
-    #while cpu.can_pop_output():
-    #    code = cpu.pop_output()
-    #    print("%d" % code)
+    x, y = 0, 0
+    dir = 0
+    paints = {}
 
-    #cpu.reset(opcodes)
-    #cpu.push_input(2)
-    #cpu.run()
+    cpu.reset(opcodes)
+    cpu.push_input(1)
+    
+    while True:
+        cpu.run()
+        if cpu.is_stopped(): break
+        out_clr = cpu.pop_output()
+        out_turn = cpu.pop_output()
+        
+        paints[(x, y)] = out_clr
+        
+        dir = handle_turn(dir, out_turn)
+        x, y = handle_step(x, y, dir)
+        
+        if not (x, y) in paints.keys(): cpu.push_input(0)
+        else:                           cpu.push_input(paints[(x, y)])
 
-    #while cpu.can_pop_output():
-    #    code = cpu.pop_output()
-    #    print("%d" % code)
+    min_x, max_x = None, None
+    min_y, max_y = None, None
+    for z in paints.keys():
+        zx, zy = z
+        
+        if min_x is None: min_x = zx
+        elif zx < min_x:  min_x = zx
+        
+        if max_x is None: max_x = zx
+        elif zx > max_x:  max_x = zx
+        
+        if min_y is None: min_y = zy
+        elif zy < min_y:  min_y = zy
+        
+        if max_y is None: max_y = zy
+        elif zy > max_y:  max_y = zy
+        
+    print("x: %d..%d" % (min_x, max_x))
+    print("y: %d..%d" % (min_y, max_y))
+
+    for y in range(min_y, max_y+1):
+        for x in range(min_x, max_x+1):
+            if (x, y) in paints.keys():
+                if paints[(x, y)] == 0: print(".", end='')
+                if paints[(x, y)] == 1: print("#", end='')
+            else: print(" ", end='')
+        print("")
+
+
 
 
 if __name__ == "__main__":
