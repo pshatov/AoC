@@ -211,22 +211,29 @@ for i in range(len(layers)):
     for r in layers[i]:
         dump_reaction_dst_name(r.name, reactions)
 
-depot = {}
-for c in known_components: depot[c] = 0
-depot["FUEL"] = -1
+min_depot = {}
+max_depot = {}
+for c in known_components:
+    min_depot[c] = 0
+    max_depot[c] = 0
+min_depot["FUEL"] = -1
 
 def print_producing(cc):
     for c in cc:
         print("%s" % (c))
         
-def print_missing(cc):
+def print_missing(cc, dd):
     for c in cc:
-        print("%d %s" % (-depot[c], c))
+        print("%d %s" % (-dd[c], c))
 
-def get_missing_stuff():
+def print_depot(dd):
+    for d in dd:
+        print("%d %s" % (dd[d], d))
+
+def get_missing_stuff(dd):
     ret = []
-    for c in depot.keys():
-        if depot[c] < 0:
+    for c in dd.keys():
+        if dd[c] < 0:
             ret.append(c)
     return ret
 
@@ -236,33 +243,50 @@ def get_producing_stuff(l):
         ret.append(r.name)
     return ret
 
-def run_reaction(d):
+def run_reaction(c, dd):
     
     total = 0
     
-    r = find_reaction_by_dst_name(d, reactions)
+    r = find_reaction_by_dst_name(c, reactions)
     
-    depot[r.name] += r.count
+    dd[r.name] += r.count
     
     r_src_list = reactions[r]
     for r_src in r_src_list:
         if r_src.name == "ORE":
             total += r_src.count
         else:
-            depot[r_src.name] -= r_src.count
+            dd[r_src.name] -= r_src.count
 
     return total
     
-total_ore = 0
+def recombine_reaction(c, f, dd):
+
+    total = 0
+    
+    r = find_reaction_by_dst_name(c, reactions)
+    
+    dd[c] -= r.count * f
+    
+    r_src_list = reactions[r]
+    for r_src in r_src_list:
+        if r_src.name == "ORE":
+            total += r_src.count * f
+        else:
+            dd[r_src.name] += r_src.count * f
+    
+    return total
+    
+min_ore = 0
 for l in range(len(layers)-1, -1, -1):
     
     print("Layer %d..." % (l))
     
-    missing = get_missing_stuff()
+    missing = get_missing_stuff(min_depot)
     producing = get_producing_stuff(l)
     
     print("Stuff we're missing:")
-    print_missing(missing)
+    print_missing(missing, min_depot)
     print("Stuff we're producing:")
     print_producing(producing)
     
@@ -270,10 +294,59 @@ for l in range(len(layers)-1, -1, -1):
         if m in producing:
             print("Generating %s: " % (m), end='')
             iters = 0
-            while depot[m] < 0:
+            while min_depot[m] < 0:
                 iters += 1
-                total_ore += run_reaction(m)
+                min_ore += run_reaction(m, min_depot)
             print("x%d" % (iters))
     
 
-print("total_ore = %d" % (total_ore))
+print("")
+print("min_ore = %d" % (min_ore))
+
+max_fuel = 0
+leftover_ore = 1000000000000
+
+
+iters = 0
+while True:
+    iters += 1
+    print("")
+    print("Iteration %d" % (iters))
+    print("Had %d ore, %d fuel" % (leftover_ore, max_fuel))
+    more_fuel = leftover_ore // min_ore
+    leftover_ore -= more_fuel * min_ore
+    max_fuel += more_fuel
+    print("Left %d ore, produced %d fuel" % (leftover_ore, more_fuel))
+    print("Adjusting depot...")
+    for d in min_depot:
+        max_depot[d] += min_depot[d] * more_fuel
+    print_depot(max_depot)
+    print("Recombining components")
+
+    for l in range(len(layers)-2, -1, -1):
+    
+        print("Layer %d..." % (l))
+        
+        producing = get_producing_stuff(l)
+        print("Stuff we're producing:")
+                
+        for p in producing:
+            if max_depot[p] > 0:
+                print("Have %d %s in depot" % (max_depot[p], p))
+                r = find_reaction_by_dst_name(p, reactions)
+                factor = max_depot[p] // r.count
+                print("Recombination factor: x%d" % (factor))
+                more_ore = recombine_reaction(p, factor, max_depot)
+                if more_ore > 0:
+                    print("Recombined %d ORE" % (more_ore))
+                    leftover_ore += more_ore
+
+    if more_fuel == 0: break
+
+print("")
+print("max_fuel = %d" % (max_fuel))
+
+
+
+
+
