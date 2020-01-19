@@ -31,14 +31,20 @@ class Field():
         self._num_moves = 0
         self._pixels = []
         self._waves = []
+        self._oxygen = []
+        self._oxygen_new = []
         self._px = X0
         self._py = Y0
         for y in range(H):
             self._pixels.append([])
             self._waves.append([])
+            self._oxygen.append([])
+            self._oxygen_new.append([])
             for x in range(W):
                 self._pixels[y].append(FieldPixel.UNKNOWN)
                 self._waves[y].append(-1)
+                self._oxygen[y].append(False)
+                self._oxygen_new[y].append(False)
         self._pixels[self._py][self._px]= FieldPixel.EMPTY
         self._waves[self._py][self._px] = 0
 
@@ -47,6 +53,9 @@ class Field():
         
     def wave(self, x, y):
         return self._waves[y][x]
+
+    def oxygen(self, x, y):
+        return self._oxygen[y][x]
 
     @property
     def px(self):
@@ -108,6 +117,12 @@ class Field():
         self._num_moves += 1
         print("num_moves = %4d, recursion = %3d" % (self._num_moves, level))
         
+    def repair_oxygen_system(self):
+        for y in range(len(self._pixels)):
+            for x in range(len(self._pixels[y])):
+                if self._pixels[y][x] == FieldPixel.OXYGEN:
+                    self._oxygen[y][x] = True
+        
     def propagate_wave(self, w):
         found_oxygen = False
         for y in range(len(self._waves)):
@@ -124,6 +139,30 @@ class Field():
                 if self._waves[ty][tx] == -1:
                     self._waves[ty][tx] = w+1
         return False
+
+    def _fill_oxygen_pixel(self, x, y):
+        for d in MoveDirection:
+            tx, ty = self.calc_xy_in_direction_offset(x, y, d)
+            if self._pixels[ty][tx] == FieldPixel.EMPTY:
+                if not self._oxygen[ty][tx]:
+                    self._oxygen_new[ty][tx] = True
+
+    def _propagate_oxygen(self):
+        num_filled = 0
+        for y in range(len(self._oxygen)):
+            for x in range(len(self._oxygen[y])):
+                if self._oxygen_new[y][x]:
+                    self._oxygen_new[y][x] = False
+                    self._oxygen[y][x] = True
+                    num_filled += 1
+        return num_filled == 0
+
+    def fill_oxygen(self):
+        for y in range(len(self._oxygen)):
+            for x in range(len(self._oxygen[y])):
+                if self._oxygen[y][x]:
+                    self._fill_oxygen_pixel(x, y)
+        return self._propagate_oxygen()
 
 field_pixel_map = {FieldPixel.UNKNOWN: '?',
                    FieldPixel.EMPTY:   ' ',
@@ -162,6 +201,18 @@ def redraw_screen_wave():
                 print(pixel_map, end='')
         print("")
     print("", flush=True)
+    
+def redraw_screen_oxygen():
+    print("\033[?25l\033[0;0H", end='')
+    for y in range(H):
+        for x in range(W):
+            pixel = field.pixel(x,y)
+            pixel_map = field_pixel_map[pixel]
+            oxygen = field.oxygen(x,y)
+            if oxygen: print("O", end='')
+            else:      print(pixel_map, end='')
+        print("")
+    print("", flush=True)    
 
 def get_opposite_direction(d):
     if   d == MoveDirection.UP: return MoveDirection.DN
@@ -269,6 +320,20 @@ def main():
     print("")
     print("wave = %d" % (wave+1), flush=True)
     
+    minutes = 0
+    oxygen_filled = False
+    field.repair_oxygen_system()
+    redraw_screen_oxygen()
+    while not oxygen_filled:
+        wait_key()
+        minutes += 1
+        oxygen_filled = field.fill_oxygen()
+        redraw_screen_oxygen()    
+
+    print("")
+    print("")
+    print("minutes = %d" % (minutes-1), flush=True)
+
 
 if __name__ == "__main__":
     main()
