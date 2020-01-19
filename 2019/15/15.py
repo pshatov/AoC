@@ -73,7 +73,6 @@ class Field():
         elif d == MoveDirection.RT: return x+1, y
 
     def try_move_in_direction(self, d):
-        #print("    try_move_in_direction(): %d / %d" % (self._px, self._py))
         s = _cpu_try_move(d)
         if s == MoveStatus.HIT_WALL:
             self.set_pixel_in_direction(d, FieldPixel.WALL)
@@ -87,17 +86,13 @@ class Field():
 
     def set_pixel_in_direction(self, d, v):
         x, y = self.calc_xy_in_direction(d)
-        #print("calc: %d / %d" % (x, y))
         if self._pixels[y][x] != FieldPixel.UNKNOWN:
-            print("d = %s" % d)
-            print("v = %s" % v)
-            print("px / py = %d / %d" % (px, py))
-            print("x / y = %d / %d" % (x, y))
-            print("field[y][x] = %s" % self._pixels[y][x])
+            #print("d = %s" % d)
+            #print("v = %s" % v)
+            #print("px / py = %d / %d" % (px, py))
+            #print("x / y = %d / %d" % (x, y))
+            #print("field[y][x] = %s" % self._pixels[y][x])
             raise Exception("Field overwrite!")
-        else:
-            #print("(%d, %d) <- %s" % (x, y, v), flush=True)
-            pass
         self._pixels[y][x] = v
         
     def can_move_in_direction_cache(self, d):
@@ -192,21 +187,6 @@ def _cpu_backtrack_move(d):
     _cpu_just_move(get_opposite_direction(d))
 
 
-# def just_shift_position_in_direction(d):
-    # global px, py
-    # print("%d, %d" % (px, py))
-    # px, py = get_xy_in_direction(d)
-    # print("%d, %d" % (px, py))
-    
-# def just_move_in_direction(d):
-    # global px, py
-    # px, py = get_xy_in_direction(d)
-    # s = _cpu_do_move(d)
-    # if s != MoveStatus.DID_MOVE:
-        # raise Exception("s != MoveStatus.DID_MOVE")
-
-
-
 def get_sideway_directions(d):
     if   d == MoveDirection.UP: return [MoveDirection.LT, MoveDirection.RT]
     elif d == MoveDirection.DN: return [MoveDirection.RT, MoveDirection.LT]
@@ -228,9 +208,7 @@ def can_move_sideways(d, dirs):
 def field_look_around():
     dirs = []
     for d in MoveDirection:
-        #print("  field_look_around(): %s" % d)
         if field.is_explored_in_direction(d):
-            #print("    already explored")
             if field.can_move_in_direction_cache(d): dirs.append(d)
         else:
             if field.try_move_in_direction(d): dirs.append(d)
@@ -238,7 +216,6 @@ def field_look_around():
     return dirs
 
 def explore_current_pixel(limit_dirs, level=0):
-    #print("explore_current_pixel(): @(%d, %d)" % (field.px, field.py))
     can_go_dirs = field_look_around()
     for d in limit_dirs:
         if not d in can_go_dirs: continue
@@ -246,14 +223,12 @@ def explore_current_pixel(limit_dirs, level=0):
         went_distance = 0
         new_can_go_dirs = [d]
         while d in new_can_go_dirs:
-            #wait_key()
             field.move_in_direction(d, level)
             went_distance += 1
             new_can_go_dirs = field_look_around()
             if can_move_sideways(d, new_can_go_dirs):
                 queue.append(went_distance)
         while went_distance > 0:
-            #wait_key()
             if went_distance in queue:
                 new_can_go_dirs = field_look_around()
                 sides = get_sideway_directions(d)
