@@ -161,9 +161,7 @@ class Intcode:
         self._set_mem_at_offset(c_addr, c)
         self._step_pc(IntcodeInstr.MULT)
         
-    def _handler_instr_input(self):
-        #print("INPUT: %d [%d]" % (self._get_mem_at_pc(), self._get_mem_at_pc_index(1)))
-        
+    def _handler_instr_input(self):        
         if len(self._input) == 0:
             self._state = IntcodeState.WAIT_INPUT
             return True
@@ -183,16 +181,12 @@ class Intcode:
         
 
         
-    def _handler_instr_output(self):
-        #print("OUTPUT:")
-    
+    def _handler_instr_output(self):    
         a = self._get_param_value(1)
         self._output.append(a)
         self._step_pc(IntcodeInstr.OUTPUT)
 
-    def _handler_instr_jmp_true(self):
-        #print("JMP_TRUE:")
-        
+    def _handler_instr_jmp_true(self):        
         a_mode = self._decode_opcode_param_mode(1)
         b_mode = self._decode_opcode_param_mode(2)
         
@@ -202,18 +196,14 @@ class Intcode:
         if a != 0: self._pc = b
         else: self._step_pc(IntcodeInstr.JMP_TRUE)
 
-    def _handler_instr_jmp_false(self):
-        #print("JMP_FALSE:")
-        
+    def _handler_instr_jmp_false(self):        
         a = self._get_param_value(1)
         b = self._get_param_value(2)
         
         if a == 0: self._pc = b
         else: self._step_pc(IntcodeInstr.JMP_FALSE)
 
-    def _handler_instr_cmp_lt(self):
-        #print("CMP_LT:")
-        
+    def _handler_instr_cmp_lt(self):        
         a = self._get_param_value(1)
         b = self._get_param_value(2)
         c = 1 if a < b else 0
@@ -223,9 +213,7 @@ class Intcode:
         self._set_mem_at_offset(c_addr, c)
         self._step_pc(IntcodeInstr.CMP_LT)
 
-    def _handler_instr_cmp_eq(self):
-        #print("CMP_EQ:")
-        
+    def _handler_instr_cmp_eq(self):        
         a = self._get_param_value(1)
         b = self._get_param_value(2)
         c = 1 if a == b else 0
@@ -236,7 +224,6 @@ class Intcode:
         self._step_pc(IntcodeInstr.CMP_LT)
     
     def _handler_instr_offset(self):
-        #print("OFFSET: %d [%d]" % (self._get_mem_at_pc(), self._get_mem_at_pc_index(1)))
         old_offset = self._offset
                 
         a = self._get_param_value(1)
@@ -247,8 +234,7 @@ class Intcode:
         
         new_offset = self._offset
         
-        #print("    %d -> %d" % (old_offset, new_offset))
-        
+
 
     def load_opcodes(self, filename):
         opcodes = list()
