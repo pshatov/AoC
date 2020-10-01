@@ -80,129 +80,115 @@ with open('input.txt') as f:
 moons1 = moons.copy()
 moons2 = moons.copy()
 
-for k in range(1000):
+if False:
+    for k in range(1000):
+
+        for i in range(num_moons):
+            for j in range(num_moons):
+                if i == j: continue
+                moons1[i].apply_gravity(moons1[j])
+
+        for i in range(num_moons):
+            moons1[i].apply_velocity()
+            
+    #    print("\nAfter %d step%s:" % (k+1, "s" if k > 0 else ""))
+    #    for i in range(num_moons):
+    #        moons1[i].print_state()
+        
+        total_energy = 0
+        for i in range(num_moons):
+            total_energy += moons1[i].total_energy
+        
+        #print("\ntotal_energy = %d" % (total_energy))
+    
+    print("\ntotal_energy = %d" % (total_energy))
+
+
+
+
+
+
+def all_states_x():
+    all_states = []
+    for i in range(num_moons):
+        all_states.append(moons2[i].state_x)
+    return all_states
+
+def all_states_y():
+    all_states = []
+    for i in range(num_moons):
+        all_states.append(moons2[i].state_y)
+    return all_states
+
+def all_states_z():
+    all_states = []
+    for i in range(num_moons):
+        all_states.append(moons2[i].state_z)
+    return all_states
+
+num_steps = 0
+
+period_x = -1
+period_y = -1
+period_z = -1
+
+prev_states_x = all_states_x()
+prev_states_y = all_states_y()
+prev_states_z = all_states_z()
+
+def matches_previous_x():
+    return prev_states_x == all_states_x()
+
+def matches_previous_y():
+    return prev_states_y == all_states_y()
+
+def matches_previous_z():
+    return prev_states_z == all_states_z()
+
+for k in range(500000):
+
+    num_steps += 1
+
+    if (num_steps % 1000) == 0:
+        print("num_steps = %d" % num_steps)
 
     for i in range(num_moons):
         for j in range(num_moons):
             if i == j: continue
-            moons1[i].apply_gravity(moons1[j])
+            moons2[i].apply_gravity(moons2[j])
 
     for i in range(num_moons):
-        moons1[i].apply_velocity()
-            
-#    print("\nAfter %d step%s:" % (k+1, "s" if k > 0 else ""))
-#    for i in range(num_moons):
-#        moons1[i].print_state()
+        moons2[i].apply_velocity()
         
-    total_energy = 0
-    for i in range(num_moons):
-        total_energy += moons1[i].total_energy
+    if period_x < 0:
+        if matches_previous_x():
+            print("Found X!")
+            period_x = num_steps
+
+    if period_y < 0:
+        if matches_previous_y():
+            print("Found Y!")
+            period_y = num_steps
+
+    if period_z < 0:
+        if matches_previous_z():
+            print("Found Z!")
+            period_z = num_steps
         
-    #print("\ntotal_energy = %d" % (total_energy))
+    #prev_states_x.append(all_states_x())
+    #prev_states_y.append(all_states_y())
+    #prev_states_z.append(all_states_z())
     
-print("\ntotal_energy = %d" % (total_energy))
+print("period_x = %d" % period_x)
+print("period_y = %d" % period_y)
+print("period_z = %d" % period_z)
 
+def calc_gcd(x, y):
+    if y == 0: return x
+    else: return calc_gcd(y, x % y)
 
-# def all_states_x():
-    # all_states = []
-    # for i in range(num_moons):
-        # all_states.append(moons2[i].state_x)
-    # return all_states
+period_xy = period_x * period_y // calc_gcd(period_x, period_y)
+period_xyz = period_xy * period_z // calc_gcd(period_xy, period_z)
 
-# def all_states_y():
-    # all_states = []
-    # for i in range(num_moons):
-        # all_states.append(moons2[i].state_y)
-    # return all_states
-
-# def all_states_z():
-    # all_states = []
-    # for i in range(num_moons):
-        # all_states.append(moons2[i].state_z)
-    # return all_states
-
-# num_steps = 0
-
-# period_x = -1
-# period_y = -1
-# period_z = -1
-
-# prev_states_x = []
-# prev_states_y = []
-# prev_states_z = []
-
-# prev_states_x.append(all_states_x())
-# prev_states_y.append(all_states_y())
-# prev_states_z.append(all_states_z())
-
-# def matches_previous_x():
-    # x = all_states_x()
-    # for prev_x in prev_states_x:
-        # if x == prev_x:
-            # print(prev_x)
-            # return True
-    # return False
-
-# def matches_previous_y():
-    # y = all_states_y()
-    # for prev_y in prev_states_y:
-        # if y == prev_y:
-            # print(prev_y)
-            # return True
-    # return False
-
-# def matches_previous_z():
-    # z = all_states_z()
-    # for prev_z in prev_states_z:
-        # if z == prev_z:
-            # print(prev_z)
-            # return True
-    # return False
-
-# for k in range(100000):
-
-    # num_steps += 1
-
-    # if (num_steps % 1000) == 0:
-        # print("num_steps = %d" % num_steps)
-
-    # for i in range(num_moons):
-        # for j in range(num_moons):
-            # if i == j: continue
-            # moons2[i].apply_gravity(moons2[j])
-
-    # for i in range(num_moons):
-        # moons2[i].apply_velocity()
-        
-    # if period_x < 0:
-        # if matches_previous_x():
-            # print("Found X!")
-            # period_x = num_steps
-
-# #    if period_y < 0:
-# #        if matches_previous_y():
-# #            print("Found Y!")
-# #            period_y = num_steps
-
-# #    if period_z < 0:
-# #        if matches_previous_z():
-# #            print("Found Z!")
-# #            period_z = num_steps
-        
-    # prev_states_x.append(all_states_x())
-# #    prev_states_y.append(all_states_y())
-# #    prev_states_z.append(all_states_z())
-    
-# print("period_x = %d" % period_x)
-# print("period_y = %d" % period_y)
-# print("period_z = %d" % period_z)
-
-# def calc_gcd(x, y):
-    # if y == 0: return x
-    # else: return calc_gcd(y, x % y)
-
-# period_xy = period_x * period_y // calc_gcd(period_x, period_y)
-# period_xyz = period_xy * period_z // calc_gcd(period_xy, period_z)
-
-# print("period_xyz = %d" % period_xyz)
+print("period_xyz = %d" % period_xyz)
 
