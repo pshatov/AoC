@@ -236,7 +236,7 @@ class Intcode:
         
 
 
-    def load_opcodes(self, filename):
+    def load_opcodes(filename):
         opcodes = list()
         with open(filename) as f:
             line = f.readline().strip()
