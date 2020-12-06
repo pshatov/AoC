@@ -1,8 +1,8 @@
 N = []
 
 with open('input.txt') as f:
-   for fl in f:
-    N.append(int(fl))
+    for fl in f:
+        N.append(int(fl))
 
 found = False
 for i in range(len(N)-1): # i = 1, 2, ..., N-1
