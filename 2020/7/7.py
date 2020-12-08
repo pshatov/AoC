@@ -14,6 +14,7 @@ def load_rules():
             parse_rule(fl.strip())
             
 def parse_rule(rule):
+
     m = key_regexp.fullmatch(rule)
     if m is None: raise RuntimeError
     
@@ -25,7 +26,7 @@ def parse_rule(rule):
     values_list = values.split(', ')
     for next_value in values_list:
         if next_value == "no other bags":
-            EMPTY.append(next_value)
+            EMPTY.append(key)
             continue
         m = value_regexp.fullmatch(next_value)
         m_count = int(m.group(1))
@@ -33,9 +34,9 @@ def parse_rule(rule):
         RULES[key][m_color] = m_count
 
         if m is None: raise RuntimeError
-        #RULES[key][
-    
-    
+        
+def print_depth(msg, lvl):
+    print("%s%s" % (4 * " " * lvl, msg))
 
 def main():
     load_rules()
@@ -63,6 +64,28 @@ def main():
         #print("round: %d, added: %d" % (round, added))
 
     print("len(C): %d" % len(C))
+    
+    B = []
+    total = 0
 
+    for sk in RULES[COLOR].keys():
+        sm = RULES[COLOR][sk]
+        #print(" >> %d %s" % (sm, sk))
+        st = sk, sm
+        B.append(st)
+    
+    while len(B) > 0:
+        sk, sm = B[0]
+        total += sm
+        del B[0]
+        #print(" << %d %s" % (sm, sk))
+        for zk in RULES[sk].keys():
+            zm = sm * RULES[sk][zk]
+            zt = zk, zm
+            B.append(zt)
+            #print(" >> %d %s" % (zm, zk))
+
+    print("total: %d" % total)
+    
 if __name__ == '__main__':
     main()
