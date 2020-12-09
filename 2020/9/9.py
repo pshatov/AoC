@@ -17,9 +17,24 @@ for k in range(N, len(PORT)):
     #print("k = %d" % k)
     v = is_wnd_valid(k)
     if not v:
-        print("%d" % PORT[k])
+        print("%d [%d]" % (PORT[k], k))
         break
     del WND[0]
     WND.append(PORT[k])
     #print(WND)
 
+l, found = 2, False
+while not found:
+    l1 = l - 1
+    for p in range(0, len(PORT) - l1):
+        k_start, k_stop = p, p + l1
+        if k_start <= k <= k_stop:
+            continue
+        #print("%d, %d" % (k_start, k_stop))
+        if sum(PORT[k_start:k_stop+1]) == PORT[k]:
+            print("l: %d" % l)
+            print("k_start, k_stop: %d, %d" % (k_start, k_stop))
+            print("%d" % (min(PORT[k_start:k_stop+1]) + max(PORT[k_start:k_stop+1])))
+            found = True
+            break
+    l += 1
