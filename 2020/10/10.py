@@ -42,3 +42,57 @@ delta3 += 1
 print("delta1: %d" % delta1)
 print("delta3: %d" % delta3)
 print("%d" % (delta1 * delta3))
+
+
+G = []
+G.append([0])
+
+for k in range(len(C)):
+    if (C[k] - G[-1][-1]) == 3:
+        G.append([])
+    G[-1].append(C[k])
+    
+N = None
+Z = None
+
+def try_remove(g, i):
+    global N, Z
+    if 1 <= (g[i+1] - g[i-1]) <= 3:
+        LL = g[:]
+        del LL[i]
+        if LL not in Z:
+            N += 1
+            Z.append(LL)
+            print("LL: ", LL)
+            for ii in range(1, len(LL)-1):
+                try_remove(LL, ii)
+
+def calc_vars(g):
+    global N, Z
+    N = 0
+    Z = []
+    for k in range(1, len(g)-1):
+        try_remove(g, k)
+    return N
+
+    
+
+
+V = []
+for grp in G:
+    print("G: ", grp)
+    if len(grp) > 2:
+        n = calc_vars(grp)
+        print("  %d" % n)
+        V.append(n)
+    else:
+        print("  X")
+        
+T = 1
+for v in V:
+    T *= (v + 1)
+#T += 1
+
+print("T: %d" % T)
+
+
