@@ -12,7 +12,7 @@ for b in BUS:
     num_cyc = TS // b
     tx = b * (num_cyc + 1)
     BUS_TS[b] = tx
-    
+
 min_ts = BUS_TS[BUS[0]]
 min_b = BUS[0]
 for bi in range(1, len(BUS)):
@@ -24,3 +24,23 @@ for bi in range(1, len(BUS)):
 
 print("%d" % (min_b * (min_ts - TS)))
     
+BUS_OFFSET = {}
+offset = 0
+for b in FL[1].strip().split(','):
+    if b != 'x': BUS_OFFSET[int(b)] = offset
+    offset += 1
+
+print(BUS)
+
+if BUS_OFFSET[BUS[0]] != 0: raise RuntimeError
+
+t = 0
+m = BUS[0]
+for bi in range(1, len(BUS)):
+    b = BUS[bi]
+    b_o = BUS_OFFSET[b]
+    while (t + b_o) % b != 0:
+        t += m
+    m *= b
+
+print(t)
