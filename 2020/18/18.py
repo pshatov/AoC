@@ -15,7 +15,7 @@ def extract_brackets(l):
             i_start = i_stop
     raise RuntimeError
 
-def simplify_brackets(b):
+def simplify_brackets1(b):
     bl = b.split(' ')
     r = int(bl[0])
     for bi in range(1, len(bl), 2):
@@ -24,15 +24,41 @@ def simplify_brackets(b):
         elif bx == '*': r *= by
     return r
 
-def parse_line(l):
+def simplify_brackets2(b):
+    bl = b.split(' ')
+    while '+' in bl:
+        for bi in range(1, len(bl), 2):
+            if bl[bi] == '+':
+                bl[bi] = str(int(bl[bi-1]) + int(bl[bi+1]))
+                del bl[bi+1]
+                del bl[bi-1]
+                break
+    r = int(bl[0])
+    for bi in range(2, len(bl), 2):
+        r *= int(bl[bi])
+    return r
+
+
+def parse_line1(l):
     while l.startswith('('):
         a, b, c = extract_brackets(l)
-        bb = simplify_brackets(b)
+        bb = simplify_brackets1(b)
+        l = a + str(bb) + c
+    return int(bb)
+
+def parse_line2(l):
+    while l.startswith('('):
+        a, b, c = extract_brackets(l)
+        bb = simplify_brackets2(b)
         l = a + str(bb) + c
     return int(bb)
 
 
-s = 0
+
+s1 = 0
+s2 = 0
 for l in LINES:
-    s += parse_line(l)
-print("s: %d" % s)
+    s1 += parse_line1(l)
+    s2 += parse_line2(l)
+print("s1: %d" % s1)
+print("s2: %d" % s2)
