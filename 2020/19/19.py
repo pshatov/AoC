@@ -1,4 +1,5 @@
 import re
+import sys
 from enum import Enum, auto
 
 
@@ -458,7 +459,7 @@ def main():
         load_input_partial(f, MSGS)
 
     parse_rules(t)
-    # dump_rules()
+    dump_rules()
 
     go = True
     while go:
@@ -469,19 +470,63 @@ def main():
 
     dump_rules()
 
-    num = 0
-    for i in range(len(MSGS)):
-        print("%03d of %3d" % (i+1, len(MSGS)))
-        mi = MSGS[i]
-        if check_match_recursive(mi, 0):
-            num += 1
-            print("  Yes (%d)" % num)
-        else:
-            print("  No")
+    if False:
+        num = 0
+        for i in range(len(MSGS)):
+            print("%03d of %3d" % (i+1, len(MSGS)))
+            mi = MSGS[i]
+            if check_match_recursive(mi, 0):
+                num += 1
+                print("  Yes (%d)" % num)
+            else:
+                print("  No")
+            sys.stdout.flush()
 
-    print("")
-    print("num: %d" % num)
+        print("")
+        print("num: %d" % num)
 
+    RULES.clear()
+    parse_rules(t)
+    dump_rules()
+
+    del RULES[8]
+    del RULES[11]
+
+    # 8: 42 | 42 8
+    RULES[428] = Rule(RuleType.Comma, [42, 8])
+    RULES[8] = Rule(RuleType.Pipe, [42, 428])
+
+    # 11: 42 31 | 42 11 31
+    RULES[4231] = Rule(RuleType.Comma, [42, 31])
+    RULES[1131] = Rule(RuleType.Comma, [11, 31])
+    RULES[421131] = Rule(RuleType.Comma, [42, 1131])
+    RULES[11] = Rule(RuleType.Pipe, [4231, 421131])
+
+    dump_rules()
+
+    go = True
+    while go:
+        print('.')
+        n1 = patch_simple_rules()
+        n2 = combine_comma_rules()
+        go = n1 > 0 and n2 > 0
+
+    dump_rules()
+
+    if True:
+        num = 0
+        for i in range(len(MSGS)):
+            print("%03d of %3d" % (i + 1, len(MSGS)))
+            mi = MSGS[i]
+            if check_match_recursive(mi, 0):
+                num += 1
+                print("  Yes (%d)" % num)
+            else:
+                print("  No")
+            sys.stdout.flush()
+
+        print("")
+        print("num: %d" % num)
 
 if __name__ == '__main__':
     main()
