@@ -4,6 +4,9 @@ ALLERGENS_LISTS = []
 INGREDIENTS = {}
 ALLERGENS = {}
 
+CANONICAL = {}
+
+
 def load_input():
     with open('input.txt') as f:
         for fl in f:
@@ -55,6 +58,32 @@ def main():
         for i in i_list:
             if len(INGREDIENTS[i]) == 0: cnt += 1
     print("cnt: %d" % cnt)
+
+    while len(INGREDIENTS) > 0:
+        i_delete = []
+        a_known = []
+
+        for i in INGREDIENTS:
+            if len(INGREDIENTS[i]) == 0: i_delete.append(i)
+            if len(INGREDIENTS[i]) == 1:
+                a = INGREDIENTS[i][0]
+                CANONICAL[a] = i
+                a_known.append(a)
+                i_delete.append(i)
+
+        for a in a_known:
+            for i in INGREDIENTS:
+                if a in INGREDIENTS[i]:
+                    INGREDIENTS[i].remove(a)
+
+        for i in i_delete:
+            del INGREDIENTS[i]
+
+    r = ""
+    for a in sorted(CANONICAL):
+        if r: r += ','
+        r += CANONICAL[a]
+    print("r: %s" % r)
 
 
 if __name__ == '__main__':
