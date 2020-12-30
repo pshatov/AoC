@@ -5,19 +5,14 @@ subject_number = 7
 def hack_private_key(pubkey):
     t = 1
     for i in range(100000000):
-        t *= subject_number
-        t %= modulus
+        t = (t * subject_number) % modulus
         if t == pubkey:
             return i+1
     raise RuntimeError
 
 
 def generate_shared_key(subject, loop_size):
-    t = 1
-    for i in range(loop_size):
-        t *= subject
-        t %= modulus
-    return t
+    return pow(subject, loop_size, modulus)
 
 
 def main():
