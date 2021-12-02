@@ -49,6 +49,26 @@ def part1(commands: List[CommandClass]) -> int:
 
 
 # ---------------------------------------------------------------------------------------------------------------------
+def part2(commands: List[CommandClass]) -> int:
+
+    depth, position, aim = 0, 0, 0
+
+    for cmd in commands:
+        if cmd.direction == DirectionEnum.Forward:
+            position += cmd.distance
+            depth += aim * cmd.distance
+        elif cmd.direction == DirectionEnum.Down:
+            aim += cmd.distance
+        elif cmd.direction == DirectionEnum.Up:
+            aim -= cmd.distance
+        else:
+            raise RuntimeError
+
+    return depth * position
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
 def main() -> None:
 
     with open('input.txt') as f:
@@ -63,6 +83,8 @@ def main() -> None:
     r1 = part1(commands)
     print("r1 = %d" % r1)
 
+    r2 = part2(commands)
+    print("r2 = %d" % r2)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
