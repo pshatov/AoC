@@ -19,6 +19,7 @@ class BoardClass:
 
     # -----------------------------------------------------------------------------------------------------------------
     def __init__(self, f_lines: List[str]) -> None:
+        self.won = False
         self.lines = []
         for y in range(self.W):
             x = [int(xi) for xi in f_lines[y].strip().split(' ') if xi]
@@ -27,6 +28,10 @@ class BoardClass:
 
     # -----------------------------------------------------------------------------------------------------------------
     def mark(self, number: int) -> bool:
+
+        if self.won:
+            return False
+
         for y in range(self.W):
             for x in range(self.W):
                 if self.lines[y][x] == number:
@@ -34,10 +39,12 @@ class BoardClass:
 
         for y in range(self.W):
             if self._check_row(y):
+                self.won = True
                 return True
 
         for x in range(self.W):
             if self._check_col(x):
+                self.won = True
                 return True
 
         return False
@@ -86,6 +93,34 @@ def part1(numbers, boards) -> Tuple[int, int]:  # unmarked_sum, last_index
 
 
 # ---------------------------------------------------------------------------------------------------------------------
+def part2(numbers, boards) -> Tuple[int, int]:  # unmarked_sum, last_index
+    won_indices = []
+    won_sums = []
+    for i in range(len(numbers)):
+
+        won_indices.append([])
+        won_sums.append([])
+
+        ni = numbers[i]
+        for brd in boards:
+            won = brd.mark(ni)
+            if won:
+                won_indices[-1].append(i)
+                won_sums[-1].append(brd.sum)
+
+    for i in range(len(numbers) - 1, -1, -1):
+        if len(won_indices[i]) == 0:
+            pass
+        elif len(won_indices[i]) == 1:
+            return won_sums[i][0], won_indices[i][0]
+        else:
+            raise RuntimeError
+
+    raise RuntimeError
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
 def main() -> None:
 
     with open('input.txt') as f:
@@ -99,6 +134,11 @@ def main() -> None:
         boards.append(BoardClass(f_lines[offset + 1: offset + BoardClass.W1]))
 
     unmarked_sum, last_index = part1(numbers, boards)
+    last_number = numbers[last_index]
+    print("unmarked_sum * last_number = %d * %d = %d" %
+          (unmarked_sum, last_number, unmarked_sum * last_number))
+
+    unmarked_sum, last_index = part2(numbers, boards)
     last_number = numbers[last_index]
     print("unmarked_sum * last_number = %d * %d = %d" %
           (unmarked_sum, last_number, unmarked_sum * last_number))
