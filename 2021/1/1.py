@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from typing import List
 
 
@@ -9,6 +11,16 @@ def part12(depths: List[int], wnd_len=1) -> int:
             num_inc += 1
 
     return num_inc
+
+
+def graph(depths: List[int]):
+    fig, ax = plt.subplots()
+
+    ax.plot(range(len(depths)), [-d for d in depths])
+    ax.set(xlabel='distance', ylabel='depth', title='Day 1')
+
+    fig.savefig("depth.png")
+    plt.show()
 
 
 def main() -> None:
@@ -23,6 +35,9 @@ def main() -> None:
 
     num_inc2 = part12(depths, wnd_len=3)
     print(f"num_inc2 == {num_inc2}")
+
+    # optional
+    graph(depths)
 
 
 if __name__ == '__main__':
