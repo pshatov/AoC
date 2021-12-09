@@ -84,7 +84,7 @@ def create_image(field):
             t_width, t_height = fnt.getsize(t_string)
             dx, dy = (FONT_SIZE - t_width) // 2, (FONT_SIZE - t_height) // 2
 
-            drw.text((tx + dx, ty + dy), t_string, t_color, font=fnt)
+            drw.text((tx + dx + 1, ty + dy - 1), t_string, t_color, font=fnt)
 
     return img, drw
 # ---------------------------------------------------------------------------------------------------------------------
