@@ -15,5 +15,9 @@ Day 5: Hydrothermal vents map
 ![Vents map](5/field2.png)
 
 Day 6: Exponential population growth
------------------------------
+------------------------------------
 ![Population growth](6/population.png)
+
+Day 9: Hydrothermal vents smoke
+-------------------------------
+![Smoke heightmap](9/field.png)
