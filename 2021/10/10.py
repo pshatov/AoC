@@ -8,10 +8,15 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Settings
 # ---------------------------------------------------------------------------------------------------------------------
-SYNTAX_SCORE_DICT = {')': 3,
-                     ']': 57,
-                     '}': 1197,
-                     '>': 25137}
+CORRUPT_SCORE_DICT = {')': 3,
+                      ']': 57,
+                      '}': 1197,
+                      '>': 25137}
+
+INCOMPLETE_SCORE_DICT = {')': 1,
+                         ']': 2,
+                         '}': 3,
+                         '>': 4}
 
 OPENING_SET = {'(', '[', '{', '<'}
 CLOSING_SET = {')', ']', '}', '>'}
@@ -21,12 +26,17 @@ CLOSING_TO_OPENING_DICT = {')': '(',
                            '}': '{',
                            '>': '<'}
 
+OPENING_TO_CLOSING_DICT = {'(': ')',
+                           '[': ']',
+                           '{': '}',
+                           '<': '>'}
+
 
 # ---------------------------------------------------------------------------------------------------------------------
-def check_syntax(fl: str) -> int:
+def check_corrupt(fl: str) -> (int, str):
 
     if fl[0] in CLOSING_SET:
-        return SYNTAX_SCORE_DICT[fl[0]]
+        return CORRUPT_SCORE_DICT[fl[0]], None
 
     s = fl[0]
     for c in fl[1:]:
@@ -36,11 +46,23 @@ def check_syntax(fl: str) -> int:
             continue
 
         if s[-1] != CLOSING_TO_OPENING_DICT[c]:
-            return SYNTAX_SCORE_DICT[c]
+            return CORRUPT_SCORE_DICT[c], None
 
         s = s[:-1]
 
-    return 0
+    return 0, s
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+def handle_incomplete(s: str) -> int:
+
+    r = 0
+    for c in reversed(s):
+        r *= 5
+        r += INCOMPLETE_SCORE_DICT[OPENING_TO_CLOSING_DICT[c]]
+
+    return r
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -50,12 +72,22 @@ def main() -> None:
     with open('input.txt') as f:
         f_lines = [t.strip() for t in f.readlines()]
 
-    total_score = 0
+    corrupt_score = 0
+    incomplete_scores = []
     for fl in f_lines:
-        score = check_syntax(fl)
-        total_score += score
+        score, s = check_corrupt(fl)
+        if score > 0:
+            corrupt_score += score
+        elif s:
+            score = handle_incomplete(s)
+            incomplete_scores.append(score)
 
-    print("part 1: %d" % total_score)
+    print("part 1: %d" % corrupt_score)
+
+    incomplete_scores.sort()
+    incomplete_score = incomplete_scores[(len(incomplete_scores) - 1) // 2]
+
+    print("part 2: %d" % incomplete_score)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
