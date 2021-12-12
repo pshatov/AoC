@@ -19,12 +19,35 @@ Edge = Tuple[str, ...]
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def build_path_subroutes(path: Route, edges: Set[Edge]) -> List[Route]:
+def can_visit_twice(path: Route) -> bool:
+
+    path_dict = dict()
+    for p in path:
+
+        if not p.islower():
+            continue
+
+        if p not in path_dict:
+            path_dict[p] = 0
+
+        path_dict[p] += 1
+
+    if max(path_dict.values()) < 2:
+        return True
+
+    return False
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+def build_path_subroutes(path: Route, edges: Set[Edge], visit_twice_allowed: bool = False) -> List[Route]:
 
     next_nodes: List[str]
     next_nodes = []
     for e in edges:
+
         nn = None
+
         if e[0] == path[-1]:
             nn = e[1]
         if e[1] == path[-1]:
@@ -34,7 +57,13 @@ def build_path_subroutes(path: Route, edges: Set[Edge]) -> List[Route]:
             continue
 
         if nn.islower() and nn in path:
-            continue
+            if not visit_twice_allowed:
+                continue
+            else:
+                if nn == 'start':
+                    continue
+                if not can_visit_twice(path):
+                    continue
 
         next_nodes.append(nn)
 
@@ -44,7 +73,7 @@ def build_path_subroutes(path: Route, edges: Set[Edge]) -> List[Route]:
         if nn == 'end':
             subroutes.append(path_nn)
         else:
-            subroutes += build_path_subroutes(path_nn, edges)
+            subroutes += build_path_subroutes(path_nn, edges, visit_twice_allowed=visit_twice_allowed)
 
     return subroutes
 # ---------------------------------------------------------------------------------------------------------------------
@@ -66,6 +95,9 @@ def main() -> None:
 
     routes = build_path_subroutes(['start'], edges)
     print("part 1: %d" % len(routes))
+
+    routes = build_path_subroutes(['start'], edges, visit_twice_allowed=True)
+    print("part 2: %d" % len(routes))
 # ---------------------------------------------------------------------------------------------------------------------
 
 
