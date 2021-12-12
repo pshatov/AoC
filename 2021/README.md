@@ -21,3 +21,7 @@ Day 6: Exponential population growth
 Day 9: Hydrothermal vents smoke
 -------------------------------
 ![Smoke heightmap](9/field.png)
+
+Day 11: Flashing octopus field
+-------------------------------
+![Octopus field](11/field.gif)
