@@ -12,18 +12,49 @@ from typing import Dict
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def do_step(polymer: str, rules: Dict[str, str]) -> str:
+# Types
+# ---------------------------------------------------------------------------------------------------------------------
+PolymerType = Dict[str, int]
+RuleType = Dict[str, str]
 
-    polymer_pairs = [polymer[i: i + 2] for i in range(len(polymer) - 1)]
-    for i in range(len(polymer_pairs)):
-        pp = polymer_pairs[i]
-        if pp in rules:
-            polymer_pairs[i] = pp[0] + rules[pp] + pp[-1]
-        if i > 0:
-            polymer_pairs[i] = polymer_pairs[i][1:]
 
-    new_polymer = ''.join(polymer_pairs)
-    return new_polymer
+# ---------------------------------------------------------------------------------------------------------------------
+def dict_add_key(d: dict, k: str) -> None:
+    if k not in d.keys():
+        d[k] = 0
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+def do_step(components: PolymerType, pairs: PolymerType, rules: RuleType) -> None:
+
+    new_pairs = dict()
+    for t in pairs:
+        if t in rules:
+
+            extra = rules[t]
+            extra_a, extra_b = t[0] + extra, extra + t[1]
+
+            dict_add_key(new_pairs, t)
+            dict_add_key(new_pairs, extra_a)
+            dict_add_key(new_pairs, extra_b)
+            dict_add_key(components, extra)
+
+            new_pairs[t] -= pairs[t]
+            new_pairs[extra_a] += pairs[t]
+            new_pairs[extra_b] += pairs[t]
+            components[extra] += pairs[t]
+
+    for t in new_pairs:
+        if t not in pairs:
+            pairs[t] = 0
+        pairs[t] += new_pairs[t]
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+def calc_max_min(components: PolymerType) -> int:
+    return max(components.values()) - min(components.values())
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -33,26 +64,31 @@ def main() -> None:
     with open('input.txt') as f:
         f_lines = [t.strip() for t in f.readlines()]
 
-    polymer = f_lines[0]
-    rules = {}
+    polymer_pairs: PolymerType = dict()
+    for i in range(len(f_lines[0]) - 1):
+        t = f_lines[0][i: i + 2]
+        dict_add_key(polymer_pairs, t)
+        polymer_pairs[t] += 1
+
+    rules = dict()
     for fl in f_lines[2:]:
         ab, c = fl.split(' -> ')
         rules[ab] = c
 
-    # print("Template: %s" % polymer)
+    polymer_components = dict()
+    for p in f_lines[0]:
+        dict_add_key(polymer_components, p)
+        polymer_components[p] += 1
+
     for i in range(10):
-        polymer = do_step(polymer, rules)
-        # print("After step %d: %s" % (i + 1, polymer))
+        do_step(polymer_components, polymer_pairs, rules)
 
-    polymer_dict = dict()
-    for p in polymer:
-        if p not in polymer_dict:
-            polymer_dict[p] = 0
-        polymer_dict[p] += 1
+    print("part 1: %d" % calc_max_min(polymer_components))
 
-    p_max = max(polymer_dict.values())
-    p_min = min(polymer_dict.values())
-    print("part 1: %d" % (p_max - p_min))
+    for i in range(40 - 10):
+        do_step(polymer_components, polymer_pairs, rules)
+
+    print("part 2: %d" % calc_max_min(polymer_components))
 # ---------------------------------------------------------------------------------------------------------------------
 
 
