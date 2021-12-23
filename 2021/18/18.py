@@ -162,11 +162,23 @@ def main() -> None:
         if not s:
             s = n
         else:
-            s = add(s, n)
+            s = reduce(add(s, n))
             # print("after addition: %s" % s)
-            s = reduce(s)
 
     print("part 1: %s" % magnitude(s))
+
+    m_max = 0
+    for i in range(len(numbers)):
+        for j in range(len(numbers)):
+            if i == j:
+                continue
+            s = reduce(add(numbers[i], numbers[j]))
+            s = reduce(s)
+            m = magnitude(s)
+            if m > m_max:
+                m_max = m
+
+    print("part 2: %d" % m_max)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
