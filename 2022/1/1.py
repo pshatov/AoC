@@ -43,8 +43,9 @@ def main() -> None:
         last_value = int(next_line)
         all_foods[-1].add_calories(last_value)
 
-    max_value = max([f.total_calories() for f in all_foods])
-    print("part 1: %d" % max_value)
+    total_values = sorted([f.total_calories() for f in all_foods], reverse=True)
+    print("part 1: %d" % total_values[0])
+    print("part 2: %d" % sum(total_values[:3]))
 # ---------------------------------------------------------------------------------------------------------------------
 
 
