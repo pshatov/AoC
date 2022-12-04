@@ -17,6 +17,9 @@ class SectionRange:
     def fully_contains(self, section_range: 'SectionRange') -> bool:
         return self.a <= section_range.a and section_range.b <= self.b
     # -----------------------------------------------------------------------------------------------------------------
+
+    def overlaps(self, section_range: 'SectionRange') -> bool:
+        return not (self.b < section_range.a or self.a > section_range.b)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -35,12 +38,16 @@ def main() -> None:
         sections_right.append(SectionRange(right_part))
 
     num_fully_contained = 0
+    num_overlaps = 0
     for i in range(len(all_lines)):
         sl, sr = sections_left[i], sections_right[i]
         if sl.fully_contains(sr) or sr.fully_contains(sl):
             num_fully_contained += 1
+        if sl.overlaps(sr):
+            num_overlaps += 1
 
     print("part 1: %d" % num_fully_contained)
+    print("part 2: %d" % num_overlaps)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
