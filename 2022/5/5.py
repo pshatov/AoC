@@ -24,10 +24,17 @@ CmdRegExp = re.compile('^move (\\d+) from (\\d+) to (\\d+)$')
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def cmd_handler(stacks: List[str], cmd_move: int, cmd_from: int, cmd_to: int) -> None:
+def cmd_handler1(stacks: List[str], cmd_move: int, cmd_from: int, cmd_to: int) -> None:
     for i in range(cmd_move):
         stacks[cmd_to] += stacks[cmd_from][-1]
         stacks[cmd_from] = stacks[cmd_from][:-1]
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+def cmd_handler2(stacks: List[str], cmd_move: int, cmd_from: int, cmd_to: int) -> None:
+    stacks[cmd_to] += stacks[cmd_from][-cmd_move:]
+    stacks[cmd_from] = stacks[cmd_from][:-cmd_move]
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -82,16 +89,29 @@ def main() -> None:
             stack_index += 1
     assert stack_index == num_stacks
 
+    stacks_copy = stacks.copy()
     for cmd in move_lines:
         m = CmdRegExp.fullmatch(cmd)
         cmd_move, cmd_from, cmd_to = [int(t) - 1 for t in m.groups()]
         cmd_move += 1
-        cmd_handler(stacks, cmd_move, cmd_from, cmd_to)
+        cmd_handler1(stacks_copy, cmd_move, cmd_from, cmd_to)
 
     msg = ""
-    for t in stacks:
+    for t in stacks_copy:
         msg += t[-1]
     print("part 1: %s" % msg)
+
+    stacks_copy = stacks.copy()
+    for cmd in move_lines:
+        m = CmdRegExp.fullmatch(cmd)
+        cmd_move, cmd_from, cmd_to = [int(t) - 1 for t in m.groups()]
+        cmd_move += 1
+        cmd_handler2(stacks_copy, cmd_move, cmd_from, cmd_to)
+
+    msg = ""
+    for t in stacks_copy:
+        msg += t[-1]
+    print("part 2: %s" % msg)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
