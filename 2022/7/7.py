@@ -53,6 +53,11 @@ class DirNode:
                 raise RuntimeError
         return result
     # -----------------------------------------------------------------------------------------------------------------
+
+    # -----------------------------------------------------------------------------------------------------------------
+    def __repr__(self) -> str:
+        return "<'%s': %d bytes>" % (self.name, self.total_file_size())
+    # -----------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -112,6 +117,17 @@ def walk_filesystem1(filesystem: DirNode, small_dirs: List[DirNode], size_limit)
 
 
 # ---------------------------------------------------------------------------------------------------------------------
+def walk_filesystem2(filesystem: DirNode, all_dirs: List[DirNode]) -> None:
+
+    all_dirs.append(filesystem)
+
+    for n in filesystem.nodes:
+        if isinstance(n, DirNode):
+            walk_filesystem2(n, all_dirs)
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
 def main() -> None:
 
     filesystem = parse_input()
@@ -120,6 +136,42 @@ def main() -> None:
     small_dirs = []
     walk_filesystem1(filesystem, small_dirs, 100000)
     print("part 1: %d" % sum([d.total_file_size() for d in small_dirs]))
+
+    all_dirs: List[DirNode]
+    all_dirs = []
+    walk_filesystem2(filesystem, all_dirs)
+
+    all_dirs_sorted = sorted(all_dirs, key=lambda d: d.total_file_size())
+
+    total_disk_space = 70000000
+    needed_disk_space = 30000000
+
+    print("total_disk_space: %d" % total_disk_space)
+    print("needed_disk_space: %d" % needed_disk_space)
+
+    used_disk_space = filesystem.total_file_size()
+    free_disk_space = total_disk_space - used_disk_space
+
+    print("used_disk_space: %d" % used_disk_space)
+    print("free_disk_space: %d" % free_disk_space)
+
+    assert needed_disk_space > free_disk_space
+
+    extra_disk_space = needed_disk_space - free_disk_space
+    print("extra_disk_space: %d" % extra_disk_space)
+
+    target_dir = None
+    for d in all_dirs_sorted:
+        print("%s, %d bytes" % (d.name, d.total_file_size()), end='')
+        if d.total_file_size() > extra_disk_space and target_dir is None:
+            target_dir = d
+            print(" <---")
+        else:
+            print("")
+
+    assert target_dir is not None
+
+    print("part 2: %d" % target_dir.total_file_size())
 # ---------------------------------------------------------------------------------------------------------------------
 
 
