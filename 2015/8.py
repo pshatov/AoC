@@ -21,7 +21,7 @@ class UnescapeState(Enum):
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def unescape_source_line(line: str) -> str:
+def unescape_line(line: str) -> str:
 
     hex_chars = "0123456789abcdef"
 
@@ -73,21 +73,45 @@ def unescape_source_line(line: str) -> str:
 
 
 # ---------------------------------------------------------------------------------------------------------------------
+def escape_line(line: str) -> str:
+
+    new_line = ""
+    for s in line:
+        if s == "\\":
+            new_line += "\\\\"
+        elif s == "\"":
+            new_line += "\\\""
+        else:
+            new_line += s
+
+    new_line = "\"" + new_line + "\""
+
+    return new_line
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
 def main() -> None:
 
     with open('input_8.txt') as file:
         all_lines = [line for line in [line.strip() for line in file.readlines()] if line]
 
-    total_len_source = 0
-    total_len_memory = 0
-    for source_line in all_lines:
+    total_len_input = 0
+    total_len_code = 0
+    total_len_output = 0
 
-        total_len_source += len(source_line)
+    for input_line in all_lines:
+        code_line = unescape_line(input_line)
+        output_line = escape_line(input_line)
 
-        memory_line = unescape_source_line(source_line)
-        total_len_memory += len(memory_line)
+        print(f"{input_line} -> {code_line} -> {output_line}")
 
-    print("part 1: %d" % (total_len_source - total_len_memory))
+        total_len_input += len(input_line)
+        total_len_code += len(code_line)
+        total_len_output += len(output_line)
+
+    print("part 1: %d" % (total_len_input - total_len_code))
+    print("part 2: %d" % (total_len_output - total_len_input))
 # ---------------------------------------------------------------------------------------------------------------------
 
 
