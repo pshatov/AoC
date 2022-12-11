@@ -8,14 +8,8 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------------------------------------------------
-from typing import List
-
-
-# ---------------------------------------------------------------------------------------------------------------------
-# Settings
-# ---------------------------------------------------------------------------------------------------------------------
-DebugTurns = False
-DebugRounds = True
+from copy import deepcopy
+from typing import Tuple, List, Optional
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -72,66 +66,45 @@ class Monkey:
         self.throw_if_false = int(line_false)
 
         self.business = 0
+        self.modulo = None
     # -----------------------------------------------------------------------------------------------------------------
 
     # -----------------------------------------------------------------------------------------------------------------
     def __repr__(self) -> str:
         return "Monkey %d: [%s]" % (self.index, ', '.join([str(t) for t in self.items]))
     # -----------------------------------------------------------------------------------------------------------------
+
+    # -----------------------------------------------------------------------------------------------------------------
+    def inspect(self, limit: bool) -> Optional[Tuple[int, int]]:
+        old = self.items[0]
+        new = eval(self.operation)
+
+        if limit:
+            new //= 3
+        else:
+            assert self.modulo is not None
+            new %= self.modulo
+
+        if new % self.divisible > 0:
+            next_monkey = self.throw_if_false
+        else:
+            next_monkey = self.throw_if_true
+
+        del self.items[0]
+        self.business += 1
+
+        return next_monkey, new
+    # -----------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def debug_turns(msg: str) -> None:
-    if DebugTurns:
-        print(msg)
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------------------------------------------------
-def debug_rounds(msg: str) -> None:
-    if DebugRounds:
-        print(msg)
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------------------------------------------------
-def play_round(all_monkeys: List[Monkey]) -> None:
+def play_round(all_monkeys: List[Monkey], limit: Optional[bool] = True) -> None:
     for monkey_index in range(len(all_monkeys)):
         m = all_monkeys[monkey_index]
-        debug_turns("Monkey %d:" % monkey_index)
         while m.items:
-            old = m.items[0]
-            debug_turns("  Monkey inspects an item with a worry level of %d." % old)
-            new = eval(m.operation)
-            if '*' in m.operation:
-                multiplier = m.operation.split(' ')[2]
-                if multiplier == "old":
-                    multiplier_str = "itself"
-                elif str.isnumeric(multiplier):
-                    multiplier_str = multiplier
-                else:
-                    raise RuntimeError
-                debug_turns("    Worry level is multiplied by %s to %d." % (multiplier_str, new))
-            elif '+' in m.operation:
-                addend = eval(m.operation.split(' ')[2])
-                debug_turns("    Worry level increases by %d to %d." % (addend, new))
-            else:
-                raise RuntimeError
-            new //= 3
-            debug_turns("    Monkey gets bored with item. Worry level is divided by 3 to %d." % new)
-
-            if new % m.divisible > 0:
-                debug_turns("    Current worry level is not divisible by %d." % m.divisible)
-                all_monkeys[m.throw_if_false].items.append(new)
-                debug_turns("    Item with worry level %d is thrown to monkey %d." % (new, m.throw_if_false))
-            else:
-                debug_turns("    Current worry level is divisible by %d." % m.divisible)
-                all_monkeys[m.throw_if_true].items.append(new)
-                debug_turns("    Item with worry level %d is thrown to monkey %d." % (new, m.throw_if_true))
-
-            del m.items[0]
-            m.business += 1
+            next_monkey, new = m.inspect(limit)
+            all_monkeys[next_monkey].items.append(new)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -148,16 +121,25 @@ def main() -> None:
     for i in range(num_monkeys):
         all_monkeys.append(Monkey(i, all_lines[6 * i: 6 * (i + 1)]))
 
+    monkeys1 = deepcopy(all_monkeys)
     for i in range(20):
-        play_round(all_monkeys)
-        debug_rounds("After round %d, the monkeys are holding items with these worry levels:" % (i + 1))
-        for j in range(len(all_monkeys)):
-            items_str = ', '.join([str(t) for t in all_monkeys[j].items])
-            debug_rounds("Monkey %d: %s" % (j, items_str))
-        debug_rounds('')
+        play_round(monkeys1)
 
-    businesses_sorted = sorted([m.business for m in all_monkeys], reverse=True)
+    businesses_sorted = sorted([m.business for m in monkeys1], reverse=True)
     print("part 1: %d" % (businesses_sorted[0] * businesses_sorted[1]))
+
+    monkeys2 = deepcopy(all_monkeys)
+    modulo = 1
+    for m in monkeys2:
+        modulo *= m.divisible
+    for m in monkeys2:
+        m.modulo = modulo
+
+    for i in range(10000):
+        play_round(monkeys2, limit=False)
+
+    businesses_sorted = sorted([m.business for m in monkeys2], reverse=True)
+    print("part 2: %d" % (businesses_sorted[0] * businesses_sorted[1]))
 # ---------------------------------------------------------------------------------------------------------------------
 
 
