@@ -79,22 +79,6 @@ def add_valve_nodes(volcano: nx.DiGraph) -> None:
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-def plot_volcano(volcano: nx.DiGraph, filename: str) -> None:
-
-    a = nx.nx_agraph.to_agraph(volcano)
-
-    for e in a.edges_iter():
-        del e.attr['weight']
-
-    a.graph_attr['mode'] = "KK"
-    a.graph_attr['scale'] = 1.5
-    a.layout(prog='neato')
-
-    a.draw(filename)
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------------------------------------------------
 def build_subpaths(volcano: nx.DiGraph,
                    current_path: List[str],
                    have_minutes: int,
