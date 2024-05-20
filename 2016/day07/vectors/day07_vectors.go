@@ -6,8 +6,7 @@ type TestCaseHasBackdoor struct {
 }
 
 type TestCasePart struct {
-	Title string
-	Want  int
+	Want int
 }
 
 var (
@@ -24,11 +23,7 @@ var (
 		{"zazbz[bzb]cdb", true},
 	}
 	CasesPart = map[int][]TestCasePart{
-		1: {
-			{"input", 105},
-		},
-		2: {
-			{"input", 258},
-		},
+		1: {{105}},
+		2: {{258}},
 	}
 )

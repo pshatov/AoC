@@ -36,11 +36,11 @@ func testPart(t *testing.T, part int, f func([]string) int) {
 		t.FailNow()
 	}
 	for _, c := range cases {
-		fn := fmt.Sprintf("../data/day%02v_%v.txt", day07.DayNumber, c.Title)
+		fn := fmt.Sprintf("../data/day%02v.txt", day07.DayNumber)
 		in := util.LoadDataStrings(t, fn)
 		got := f(in)
 		if got != c.Want {
-			t.Errorf("Part%v(%#v) == %#v, want %#v", part, c.Title, got, c.Want)
+			t.Errorf("Part%v() == %#v, want %#v", part, got, c.Want)
 		}
 	}
 }
