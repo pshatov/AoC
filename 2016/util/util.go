@@ -1,10 +1,15 @@
 package util
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 )
+
+func FormatDataPath(day int) string {
+	return fmt.Sprintf("../data/day%02v.txt", day)
+}
 
 func LoadDataStrings(t *testing.T, fn string) []string {
 	data, err := os.ReadFile(fn)
