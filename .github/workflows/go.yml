@@ -5,14 +5,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./2024
     steps:
     - uses: actions/checkout@v4
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.23.5'
+        cache: false
     - name: Test
       run: go test -v ./...
