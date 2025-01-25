@@ -35,7 +35,7 @@ func TestNumSafeCalculators(t *testing.T) {
 		{"example", 2, 4},
 		{"input", 230, 301},
 	} {
-		lines := util.LoadData(day02.Day, tc.data)
+		lines := util.LoadData("..", day02.Day, tc.data)
 		reports := parseData(lines)
 		t.Run(
 			fmt.Sprintf("CalcNumSafe_%s", tc.data),

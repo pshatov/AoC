@@ -25,7 +25,7 @@ func TestComputation(t *testing.T) {
 		{"example_part2", 0, 48},
 		{"input", 178794710, 76729637},
 	} {
-		lines := util.LoadData(day03.Day, tc.data)
+		lines := util.LoadData("..", day03.Day, tc.data)
 		instructions := parseData(lines)
 		if tc.result > 0 {
 			t.Run(

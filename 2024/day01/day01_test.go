@@ -42,7 +42,7 @@ func TestDistanceAndSimilarity(t *testing.T) {
 		{"example", 11, 31},
 		{"input", 3569916, 26407426},
 	} {
-		lines := util.LoadData(day01.Day, tc.data)
+		lines := util.LoadData("..", day01.Day, tc.data)
 		a, b := parseData(lines)
 		t.Run(
 			fmt.Sprintf("distance_%s", tc.data),

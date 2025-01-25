@@ -6,12 +6,12 @@ import (
 	"os"
 )
 
-func getFileName(day int, data string) string {
-	return fmt.Sprintf("../data/day%02d_%s.txt", day, data)
+func getFileName(parent string, day int, data string) string {
+	return fmt.Sprintf("%s/data/day%02d_%s.txt", parent, day, data)
 }
 
-func LoadData(day int, data string) []string {
-	fn := getFileName(day, data)
+func LoadData(parent string, day int, data string) []string {
+	fn := getFileName(parent, day, data)
 	file, err := os.Open(fn)
 	if err != nil {
 		panic(fmt.Errorf("can't read data file '%s'", fn))
