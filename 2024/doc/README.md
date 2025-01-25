@@ -150,7 +150,7 @@ Solution to part 1:
     ...........X...........SX.SAMX......S......X....S..SS.SAMX..SAMX.S.SX.X.XS..SSS.......SAMX.....S....SS...SAMX.XMAS..SAMX..XMAS.....SAMXMAS..
     total = 2569
 
-Solution to part 1:
+Solution to part 2:
 
     ...S.S.S.M.S.M....M.M..S.M.....M.M.......M.M..................S.S.M.S................M.M...M.MM.M.......SMSSSM.....M.M.......S.S.........M.S
     ....A...AMASA.S.M.SAS...A.......A......S.MASMSSMS.MS.M.S.M.....A...A......SMSSSS.S.S.SA.....A..AM.S.M.S..AAAA..M.M..A.........A.M.S.M.....A.
