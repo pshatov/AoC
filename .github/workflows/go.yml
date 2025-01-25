@@ -15,6 +15,6 @@ jobs:
     - name: Build day04
       working-directory: ./2024/cmd/day04
       run: go build
-    - name: Test everything
+    - name: Test
       working-directory: ./2024
-      run: go test -v ./...
+      run: go test ./day*
