@@ -20,6 +20,10 @@ func LoadData(parent string, day int, data string) []string {
 	var lines []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		t := scanner.Text()
+		if len(t) == 0 {
+			continue
+		}
 		lines = append(lines, scanner.Text())
 	}
 	return lines
