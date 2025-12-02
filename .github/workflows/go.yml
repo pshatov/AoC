@@ -1,4 +1,4 @@
-name: go tests for 2024
+name: go build & test
 on:
   push:
     branches: [ "master" ]
