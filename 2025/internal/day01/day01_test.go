@@ -94,8 +94,8 @@ func TestUpdatePos(t *testing.T) {
 }
 
 func TestCountZeroes(t *testing.T) {
-	example := testutil.ReadLines(t, "example.txt")
-	input := testutil.ReadLines(t, "input.txt")
+	example := testutil.ReadAllLines(t, "example.txt")
+	input := testutil.ReadAllLines(t, "input.txt")
 
 	type result struct {
 		final int

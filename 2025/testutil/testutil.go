@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func ReadLines(t *testing.T, file string) []string {
+func readHelper(t *testing.T, file string) []string {
 	t.Helper()
 
 	data, err := os.ReadFile(file)
@@ -27,9 +27,24 @@ func ReadLines(t *testing.T, file string) []string {
 	return output
 }
 
+func ReadAllLines(t *testing.T, file string) []string {
+	t.Helper()
+	return readHelper(t, file)
+}
+
+func ReadSingleLine(t *testing.T, file string) string {
+	t.Helper()
+	lines := readHelper(t, file)
+	if len(lines) == 0 {
+		t.Fatalf("empty file '%s'", file)
+	} else if len(lines) > 1 {
+		t.Fatalf("more than one line in file '%s'", file)
+	}
+	return lines[0]
+}
+
 func MustPanic(t *testing.T, f func()) {
 	t.Helper()
-
 	defer func() {
 		r := recover()
 		if r == nil {
