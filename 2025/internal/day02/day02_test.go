@@ -8,9 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// 	"aoc/2025/testutil"
-
-func TestIsValidID(t *testing.T) {
+func TestIsValidIDPart1(t *testing.T) {
 	tests := []struct {
 		id    int
 		wants bool
@@ -26,15 +24,37 @@ func TestIsValidID(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(strconv.Itoa(tc.id), func(t *testing.T) {
-			result := isValidID(tc.id)
+			result := isValidIDPart1(tc.id)
 			if result != tc.wants {
-				t.Fatalf("isValidID(%d) result = %v, but wants = %v", tc.id, result, tc.wants)
+				t.Fatalf("isValidIDPart1(%d) result = %v, but wants = %v", tc.id, result, tc.wants)
 			}
 		})
 	}
 }
 
-func TestGetNextProbablyInvalidID(t *testing.T) {
+func TestIsValidIDPart2(t *testing.T) {
+	tests := []struct {
+		id    int
+		wants bool
+	}{
+		{12341234, false},
+		{123123123, false},
+		{1212121212, false},
+		{1111111, false},
+		{123, true},
+		{1234567890, true},
+	}
+	for _, tc := range tests {
+		t.Run(strconv.Itoa(tc.id), func(t *testing.T) {
+			result := isValidIDPart2(tc.id)
+			if result != tc.wants {
+				t.Fatalf("isValidIDPart2(%d) result = %v, but wants = %v", tc.id, result, tc.wants)
+			}
+		})
+	}
+}
+
+func TestGetNextProbablyInvalidIDPart1(t *testing.T) {
 	tests := []struct {
 		id    int
 		wants int
@@ -64,7 +84,7 @@ func TestGetNextProbablyInvalidID(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(strconv.Itoa(tc.id), func(t *testing.T) {
-			result := getNextProbablyInvalidID(tc.id)
+			result := getNextProbablyInvalidIDPart1(tc.id)
 			if result != tc.wants {
 				t.Fatalf("getNextProbablyInvalidID(%d) result = %v, but wants = %v", tc.id, result, tc.wants)
 			}
@@ -72,7 +92,7 @@ func TestGetNextProbablyInvalidID(t *testing.T) {
 	}
 }
 
-func TestFindInvalidIDs(t *testing.T) {
+func TestFindInvalidIDsPart1(t *testing.T) {
 	tests := []struct {
 		idRange string
 		wants   []int
@@ -88,7 +108,34 @@ func TestFindInvalidIDs(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.idRange, func(t *testing.T) {
-			result := findInvalidIDs(tc.idRange)
+			result := findInvalidIDs(tc.idRange, isValidIDPart1, getNextProbablyInvalidIDPart1)
+			if !cmp.Equal(result, tc.wants) {
+				t.Fatalf("findInvalidIDs(%s) result = %v, but wants = %v", tc.idRange, result, tc.wants)
+			}
+		})
+	}
+}
+
+func TestFindInvalidIDsPart2(t *testing.T) {
+	tests := []struct {
+		idRange string
+		wants   []int
+	}{
+		{"11-22", []int{11, 22}},
+		{"95-115", []int{99, 111}},
+		{"998-1012", []int{999, 1010}},
+		{"1188511880-1188511890", []int{1188511885}},
+		{"222220-222224", []int{222222}},
+		{"1698522-1698528", []int{}},
+		{"446443-446449", []int{446446}},
+		{"38593856-38593862", []int{38593859}},
+		{"565653-565659", []int{565656}},
+		{"824824821-824824827", []int{824824824}},
+		{"2121212118-2121212124", []int{2121212121}},
+	}
+	for _, tc := range tests {
+		t.Run(tc.idRange, func(t *testing.T) {
+			result := findInvalidIDs(tc.idRange, isValidIDPart2, getNextProbablyInvalidIDPart2)
 			if !cmp.Equal(result, tc.wants) {
 				t.Fatalf("findInvalidIDs(%s) result = %v, but wants = %v", tc.idRange, result, tc.wants)
 			}
@@ -101,19 +148,24 @@ func TestComputeInvalidIDs(t *testing.T) {
 	input := testutil.ReadSingleLine(t, "input.txt")
 
 	tests := []struct {
-		title string
-		line  string
-		wants int
+		title      string
+		line       string
+		wantsPart1 int
+		wantsPart2 int
 	}{
-		{"example", example, 1227775554},
-		{"input", input, 31000881061},
+		{"example", example, 1227775554, 4174379265},
+		{"input", input, 31000881061, 46769308485},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.title, func(t *testing.T) {
-			result := ComputeInvalidIDs(tc.line)
-			if result != tc.wants {
-				t.Fatalf("ComputeInvalidIDs(%s) result = %d, but wants = %d", tc.title, result, tc.wants)
+			resultV1 := ComputeInvalidIDsPart1(tc.line)
+			if resultV1 != tc.wantsPart1 {
+				t.Fatalf("ComputeInvalidIDsPart1(%s) result = %d, but wants = %d", tc.title, resultV1, tc.wantsPart1)
+			}
+			resultV2 := ComputeInvalidIDsPart2(tc.line)
+			if resultV2 != tc.wantsPart2 {
+				t.Fatalf("ComputeInvalidIDsV2(%s) result = %d, but wants = %d", tc.title, resultV2, tc.wantsPart2)
 			}
 		})
 	}

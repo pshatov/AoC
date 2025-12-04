@@ -6,58 +6,11 @@ import (
 	"strings"
 )
 
-func isValidID(idInt int) bool {
-	idStr := strconv.Itoa(idInt)
-	n := len(idStr)
-	if n%2 > 0 {
-		return true
-	}
-	return idStr[:n/2] != idStr[n/2:]
-}
-
-func getNextProbablyInvalidID(idInt int) int {
-	idStr := strconv.Itoa(idInt)
-	n := len(idStr)
-	if n%2 > 0 {
-		nextID := 1
-		for i := range n {
-			nextID *= 10
-			if i == n/2 {
-				nextID += 1
-			}
-		}
-		return nextID
-	}
-
-	upperStr, lowerStr := idStr[:n/2], idStr[n/2:]
-	upperInt, err := strconv.Atoi(upperStr)
-	if err != nil {
-		panic(fmt.Sprintf("bad upper part of id '%s'", idStr))
-	}
-	lowerInt, err := strconv.Atoi(lowerStr)
-	if err != nil {
-		panic(fmt.Sprintf("bad lower part of id '%s'", idStr))
-	}
-
-	nextUpperInt := upperInt + 1
-	if upperInt > lowerInt {
-		nextUpperInt = upperInt
-	} else if len(strconv.Itoa(nextUpperInt)) > n/2 {
-		nextID := nextUpperInt
-		for range n / 2 {
-			nextID *= 10
-		}
-		return nextID
-	}
-	nextID := nextUpperInt
-	for range n / 2 {
-		nextID *= 10
-	}
-	nextID += nextUpperInt
-	return nextID
-}
-
-func findInvalidIDs(idRange string) []int {
+func findInvalidIDs(
+	idRange string,
+	validator func(int) bool,
+	generator func(int) int,
+) []int {
 	result := []int{}
 	rangeParts := strings.Split(idRange, "-")
 	if len(rangeParts) != 2 {
@@ -73,11 +26,11 @@ func findInvalidIDs(idRange string) []int {
 		panic(fmt.Sprintf("bad id range end '%s'", endStr))
 	}
 	for {
-		ok := isValidID(beginInt)
+		ok := validator(beginInt)
 		if !ok {
 			result = append(result, beginInt)
 		}
-		beginInt = getNextProbablyInvalidID(beginInt)
+		beginInt = generator(beginInt)
 		if beginInt > endInt {
 			break
 		}
@@ -85,11 +38,15 @@ func findInvalidIDs(idRange string) []int {
 	return result
 }
 
-func ComputeInvalidIDs(idRanges string) int {
+func computeInvalidIDs(
+	idRanges string,
+	validator func(int) bool,
+	generator func(int) int,
+) int {
 	total := 0
 	parts := strings.SplitSeq(idRanges, ",")
 	for p := range parts {
-		invalidIDs := findInvalidIDs(p)
+		invalidIDs := findInvalidIDs(p, validator, generator)
 		for _, id := range invalidIDs {
 			total += id
 		}
