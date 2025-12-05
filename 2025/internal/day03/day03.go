@@ -5,37 +5,32 @@ import (
 	"strconv"
 )
 
-func getIndividualJoltages(bank string) []int {
-	values := make([]int, len(bank))
-	for pos := 0; pos < len(bank); pos++ {
-		value, err := strconv.Atoi(string(bank[pos]))
-		if err != nil {
-			panic(fmt.Sprintf("could not parse bank=%s at pos=%d", bank, pos))
+func calcMaxBankJoltage(bank string, num int) int {
+	result := []byte{}
+	extra := len(bank) - num
+	for i := range len(bank) {
+		b := bank[i]
+		for extra > 0 && len(result) > 0 && result[len(result)-1] < b {
+			result = result[:len(result)-1]
+			extra--
 		}
-		values[pos] = value
+		result = append(result, b)
 	}
-	return values
+	for extra > 0 {
+		result = result[:len(result)-1]
+		extra--
+	}
+	total, err := strconv.Atoi(string(result))
+	if err != nil {
+		panic(fmt.Errorf("internal error: %w", err))
+	}
+	return total
 }
 
-func calcMaxBankJoltage(bank string) int {
-	values := getIndividualJoltages((bank))
-	max := 0
-	for i := 0; i < len(values)-1; i++ {
-		for j := i + 1; j < len(values); j++ {
-			temp := 10*values[i] + values[j]
-			if temp > max {
-				max = temp
-			}
-		}
-	}
-
-	return max
-}
-
-func calcTotalOutputJoltage(banks []string) int {
+func calcTotalOutputJoltage(banks []string, num int) int {
 	total := 0
 	for _, b := range banks {
-		total += calcMaxBankJoltage(b)
+		total += calcMaxBankJoltage(b, num)
 	}
 	return total
 }
