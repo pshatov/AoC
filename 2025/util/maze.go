@@ -66,6 +66,10 @@ func (m *Maze) At(y, x int) int {
 	return m.matrix[y][x]
 }
 
+func (m *Maze) Set(y, x int, value int) {
+	m.matrix[y][x] = value
+}
+
 // TODO: write test (can't add border to existing border)
 func (m *Maze) AddBorder(value int) {
 	for y := range m.dy {

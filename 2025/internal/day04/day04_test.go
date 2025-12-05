@@ -6,23 +6,31 @@ import (
 )
 
 func TestCalcAccessibleRolls(t *testing.T) {
-	example := util.ReadAllLines("example.txt")
-	input := util.ReadAllLines("input.txt")
+	example := util.NewMaze(util.ReadAllLines("example.txt"), MazeKey)
+	input := util.NewMaze(util.ReadAllLines("input.txt"), MazeKey)
+
+	example.AddBorder(IntEmpty)
+	input.AddBorder(IntEmpty)
 
 	tests := []struct {
-		title string
-		maze  []string
-		wants int
+		title                  string
+		maze                   *util.Maze
+		wantsPart1, wantsPart2 int
 	}{
-		{"example", example, 13},
-		{"input", input, 1320},
+		{"example", &example, 13, 43},
+		{"input", &input, 1320, 8354},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.title, func(t *testing.T) {
-			num := CalcAccessibleRolls(tc.maze)
-			if num != tc.wants {
-				t.Fatalf("CalcAccessibleRolls(%s) result = %d, but wants = %d", tc.title, num, tc.wants)
+			points := GetAccessibleRolls(tc.maze)
+			num := len(points)
+			if num != tc.wantsPart1 {
+				t.Fatalf("CalcAccessibleRolls(%s) result = %d, but wants = %d", tc.title, num, tc.wantsPart1)
+			}
+			num = RemoveAccessibleRolls(tc.maze)
+			if num != tc.wantsPart2 {
+				t.Fatalf("RemoveAccessibleRolls(%s) result = %d, but wants = %d", tc.title, num, tc.wantsPart2)
 			}
 		})
 	}
