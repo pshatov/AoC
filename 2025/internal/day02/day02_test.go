@@ -1,7 +1,7 @@
 package day02
 
 import (
-	"aoc/2025/testutil"
+	"aoc/2025/util"
 	"strconv"
 	"testing"
 
@@ -144,8 +144,8 @@ func TestFindInvalidIDsPart2(t *testing.T) {
 }
 
 func TestComputeInvalidIDs(t *testing.T) {
-	example := testutil.ReadSingleLine(t, "example.txt")
-	input := testutil.ReadSingleLine(t, "input.txt")
+	example := util.ReadSingleLine("example.txt")
+	input := util.ReadSingleLine("input.txt")
 
 	tests := []struct {
 		title      string

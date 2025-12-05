@@ -1,7 +1,7 @@
 package day03
 
 import (
-	"aoc/2025/testutil"
+	"aoc/2025/util"
 	"fmt"
 	"testing"
 )
@@ -35,8 +35,8 @@ func TestCalcMaxBankJoltage(t *testing.T) {
 }
 
 func TestCalcTotalOutputJoltage(t *testing.T) {
-	example := testutil.ReadAllLines(t, "example.txt")
-	input := testutil.ReadAllLines(t, "input.txt")
+	example := util.ReadAllLines("example.txt")
+	input := util.ReadAllLines("input.txt")
 
 	tests := []struct {
 		title string

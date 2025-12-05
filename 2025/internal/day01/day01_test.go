@@ -2,6 +2,7 @@ package day01
 
 import (
 	"aoc/2025/testutil"
+	"aoc/2025/util"
 	"testing"
 )
 
@@ -94,8 +95,8 @@ func TestUpdatePos(t *testing.T) {
 }
 
 func TestCountZeroes(t *testing.T) {
-	example := testutil.ReadAllLines(t, "example.txt")
-	input := testutil.ReadAllLines(t, "input.txt")
+	example := util.ReadAllLines("example.txt")
+	input := util.ReadAllLines("input.txt")
 
 	type result struct {
 		final int
