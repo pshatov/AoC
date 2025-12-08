@@ -51,18 +51,43 @@ func calcColumnPart1(column []string) int {
 			result = num
 			continue
 		}
-		switch op {
-		case "+":
-			result += num
-		case "*":
-			result *= num
-		}
+		result = updateResult(result, num, op)
 	}
 	return result
 }
 
+func updateResult(result int, num int, op string) int {
+	switch op {
+	case "+":
+		return result + num
+	case "*":
+		return result * num
+	}
+	panic(fmt.Sprintf("update result failed, unknown op '%s'", op))
+}
+
 func calcColumnPart2(column []string) int {
-	return len(column)
+	dy := len(column) - 1
+	dx := len(column[dy])
+	op := strings.TrimSpace(column[dy])
+	var result int
+	for x := dx - 1; x >= 0; x-- {
+		tmp := []byte{}
+		for y := range dy {
+			tmp = append(tmp, column[y][x])
+		}
+		str := strings.TrimSpace(string(tmp))
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			panic(fmt.Sprintf("can't parse value '%s'", str))
+		}
+		if x == dx-1 {
+			result = num
+			continue
+		}
+		result = updateResult(result, num, op)
+	}
+	return result
 }
 
 func CalcHomework(lines []string, rtl bool) int {

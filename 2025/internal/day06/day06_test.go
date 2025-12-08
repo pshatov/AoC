@@ -15,7 +15,7 @@ func TestCalcHomework(t *testing.T) {
 		wantsPart1, wantsPart2 int
 	}{
 		{"example", example, 4277556, 3263827},
-		{"input", input, 6100348226985, -1},
+		{"input", input, 6100348226985, 12377473011151},
 	}
 
 	for _, tc := range tests {
