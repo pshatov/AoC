@@ -15,9 +15,15 @@ jobs:
     - name: Build 2024 day04
       working-directory: ./2024/cmd/day04
       run: go build
+    - name: Build 2025 day04
+      working-directory: ./2025/cli/day04
+      run: go build      
     - name: Test 2024
       working-directory: ./2024
       run: go test -v ./day*
-    - name: Test 2025
+    - name: Test 2025 Solutions
       working-directory: ./2025
       run: go test -v ./internal/day*
+    - name: Test 2025 Utils
+      working-directory: ./2025
+      run: go test -v ./util/*
