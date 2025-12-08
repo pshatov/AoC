@@ -14,8 +14,7 @@ func readHelper(file string) []string {
 	lines := strings.Split(string(data), "\n")
 	output := make([]string, 0, len(lines))
 	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line != "" {
+		if len(strings.TrimSpace(line)) > 0 {
 			output = append(output, line)
 		}
 	}
