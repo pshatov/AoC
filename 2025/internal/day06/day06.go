@@ -6,46 +6,76 @@ import (
 	"strings"
 )
 
-func CalcHomework(lines []string) int {
-	n := len(lines) - 1
-	numbers := make([][]int, n)
-	signs := make([]string, 0)
-	for y, ln := range lines {
-		fields := strings.Fields(ln)
-		if y < n {
-			numbers[y] = make([]int, len(fields))
-			for x, f := range fields {
-				num, err := strconv.Atoi(f)
-				if err != nil {
-					panic(fmt.Sprintf("can't parse homework line %d, bad field '%s'", y, f))
-				}
-				if y < n {
-					numbers[y][x] = num
-				}
+func splitColumns(lines []string) [][]string {
+	dy := len(lines)
+	dx := len(lines[dy-1])
+
+	start := 0
+	columns := make([][]string, 0)
+	for x := range dx {
+		emptyColumn := true
+		for y := range dy {
+			if lines[y][x] != ' ' {
+				emptyColumn = false
+				break
 			}
 		}
-		if y == n {
-			signs = append(signs, fields...)
+		if emptyColumn || x == dx-1 {
+			stop := x
+			if !emptyColumn && x == dx-1 {
+				stop++
+			}
+			c := make([]string, dy)
+			for y := range dy {
+				c[y] = lines[y][start:stop]
+			}
+			columns = append(columns, c)
+			start = x + 1
 		}
 	}
 
+	return columns
+}
+
+func calcColumnPart1(column []string) int {
+	dy := len(column) - 1
+	op := strings.TrimSpace(column[dy])
+	var result int
+	for y := range dy {
+		tmp := strings.TrimSpace(column[y])
+		num, err := strconv.Atoi(tmp)
+		if err != nil {
+			panic(fmt.Sprintf("can't parse value '%s'", tmp))
+		}
+		if y == 0 {
+			result = num
+			continue
+		}
+		switch op {
+		case "+":
+			result += num
+		case "*":
+			result *= num
+		}
+	}
+	return result
+}
+
+func calcColumnPart2(column []string) int {
+	return len(column)
+}
+
+func CalcHomework(lines []string, rtl bool) int {
+	columns := splitColumns(lines)
 	total := 0
-	for x := range len(signs) {
-		op := signs[x]
-		temp := numbers[0][x]
-		for y := 1; y < n; y++ {
-			switch op {
-			case "+":
-				temp += numbers[y][x]
-			case "*":
-				temp *= numbers[y][x]
-			}
+	for _, c := range columns {
+		var delta int
+		if !rtl {
+			delta = calcColumnPart1(c)
+		} else {
+			delta = calcColumnPart2(c)
 		}
-		next := total + temp
-		if next < total {
-			panic("overflow")
-		}
-		total = next
+		total += delta
 	}
 	return total
 }
