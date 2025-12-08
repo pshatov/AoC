@@ -17,8 +17,7 @@ func main() {
 	lines := util.ReadAllLines(file)
 	maze := util.NewMaze(lines, day04.MazeKey)
 	fmt.Printf("Maze is %d rows x %d cols\n", maze.Dy(), maze.Dx())
-	maze.AddBorder(day04.IntEmpty)
+	_ = day04.RemoveAccessibleRolls(&maze)
 	maze.DebugPrint()
-
 	os.Exit(0)
 }

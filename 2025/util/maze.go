@@ -17,7 +17,7 @@ func NewMaze(lines []string, key map[byte]int) Maze {
 	for k, v := range key {
 		_, ok := printKey[v]
 		if ok {
-
+			panic(fmt.Sprintf("invalid maze key, duplicate entry '%d'", v))
 		}
 		printKey[v] = k
 	}
@@ -70,8 +70,10 @@ func (m *Maze) Set(y, x int, value int) {
 	m.matrix[y][x] = value
 }
 
-// TODO: write test (can't add border to existing border)
 func (m *Maze) AddBorder(value int) {
+	if m.hasBorder {
+		panic("border already added")
+	}
 	for y := range m.dy {
 		m.matrix[y] = append([]int{value}, m.matrix[y]...)
 		m.matrix[y] = append(m.matrix[y], value)
@@ -87,9 +89,17 @@ func (m *Maze) AddBorder(value int) {
 	m.hasBorder = true
 }
 
-// TODO: write test (can remove nonexistent border)
 func (m *Maze) RemoveBorder() {
-	panic("not implemented")
+	if !m.hasBorder {
+		panic("no border to remove")
+	}
+	for y := 1; y < m.dy-1; y++ {
+		m.matrix[y] = m.matrix[y][1 : m.dx-1]
+	}
+	m.dx -= 2
+	m.matrix = m.matrix[1 : m.dy-1]
+	m.dy -= 2
+	m.hasBorder = false
 }
 
 func (m *Maze) DebugPrint() {
