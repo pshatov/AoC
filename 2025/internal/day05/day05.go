@@ -2,6 +2,8 @@ package day05
 
 import (
 	"fmt"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -15,6 +17,10 @@ type ID int
 type Database struct {
 	FreshRanges   []IDRange
 	IngredientIDs []ID
+}
+
+type rangeNode struct {
+	left, this, right IDRange
 }
 
 func ParseDatabase(lines []string) Database {
@@ -52,12 +58,11 @@ func (id ID) InRange(r IDRange) bool {
 }
 
 func (id ID) IsFresh(ranges []IDRange) bool {
-	for _, r := range ranges {
-		if id.InRange(r) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(ranges, id.InRange)
+}
+
+func (r IDRange) Len() int {
+	return r.right - r.left + 1
 }
 
 func CalcFreshIngredients(db Database) int {
@@ -67,5 +72,33 @@ func CalcFreshIngredients(db Database) int {
 			total++
 		}
 	}
+	return total
+}
+
+func CalcFreshRanges(ranges []IDRange) int {
+	sort.Slice(ranges, func(i, j int) bool {
+		x, y := ranges[i], ranges[j]
+		if x.left < y.left {
+			return true
+		} else if x.left == y.left {
+			return x.right < y.right
+		}
+		return false
+	})
+
+	total := 0
+	current := ranges[0]
+	for i := 1; i < len(ranges); i++ {
+		next := ranges[i]
+		if next.left > current.right+1 {
+			total += current.Len()
+			current = next
+			continue
+		}
+		if next.right > current.right {
+			current.right = next.right
+		}
+	}
+	total += current.Len()
 	return total
 }
