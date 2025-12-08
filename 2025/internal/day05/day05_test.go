@@ -19,13 +19,13 @@ func TestCalcFreshIngredients(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.title, func(t *testing.T) {
+		t.Run(tc.title+"_part1", func(t *testing.T) {
 			result := CalcFreshIngredients(tc.db)
 			if result != tc.wantsPart1 {
 				t.Fatalf("CalcFreshIngredients(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart1)
 			}
 		})
-		t.Run(tc.title, func(t *testing.T) {
+		t.Run(tc.title+"_part2", func(t *testing.T) {
 			result := CalcFreshRanges(tc.db.FreshRanges)
 			if result != tc.wantsPart2 {
 				t.Fatalf("CalcFreshRanges(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart2)
