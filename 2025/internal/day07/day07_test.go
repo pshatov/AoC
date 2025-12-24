@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCalcNumSplits(t *testing.T) {
+func TestTachyonManifold(t *testing.T) {
 	example := util.ReadAllLines("example.txt")
 	input := util.ReadAllLines("input.txt")
 
@@ -14,8 +14,8 @@ func TestCalcNumSplits(t *testing.T) {
 		lines                  []string
 		wantsPart1, wantsPart2 int
 	}{
-		{"example", example, 21, -1},
-		{"input", input, 1553, -1},
+		{"example", example, 21, 40},
+		{"input", input, 1553, 15811946526915},
 	}
 
 	for _, tc := range tests {
@@ -25,11 +25,11 @@ func TestCalcNumSplits(t *testing.T) {
 				t.Fatalf("CalcNumSplits(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart1)
 			}
 		})
-		// t.Run(tc.title+"_part2", func(t *testing.T) {
-		// 	result := CalcHomework(tc.homework, true)
-		// 	if result != tc.wantsPart2 {
-		// 		t.Fatalf("CalcHomework(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart2)
-		// 	}
-		// })
+		t.Run("part2_"+tc.title, func(t *testing.T) {
+			result := CalcNumTimelines(tc.lines)
+			if result != tc.wantsPart2 {
+				t.Fatalf("CalcNumTimelines(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart2)
+			}
+		})
 	}
 }
