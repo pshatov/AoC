@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCalcFreshIngredients(t *testing.T) {
+func TestCalcFresh(t *testing.T) {
 	example := ParseDatabase(util.ReadAllLines("example.txt"))
 	input := ParseDatabase(util.ReadAllLines("input.txt"))
 
