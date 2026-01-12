@@ -15,8 +15,8 @@ func TestJunctionBoxes(t *testing.T) {
 		count                  int
 		wantsPart1, wantsPart2 int
 	}{
-		{"example", example, 10, 40, -1},
-		{"input", input, 1000, 50568, -1},
+		{"example", example, 10, 40, 25272},
+		{"input", input, 1000, 50568, 36045012},
 	}
 
 	for _, tc := range tests {
@@ -26,11 +26,11 @@ func TestJunctionBoxes(t *testing.T) {
 				t.Fatalf("CalcPart1(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart1)
 			}
 		})
-		// t.Run("part2_"+tc.title, func(t *testing.T) {
-		// 	result := CalcNumTimelines(tc.lines)
-		// 	if result != tc.wantsPart2 {
-		// 		t.Fatalf("CalcNumTimelines(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart2)
-		// 	}
-		// })
+		t.Run("part2_"+tc.title, func(t *testing.T) {
+			result := CalcPart2(tc.boxes)
+			if result != tc.wantsPart2 {
+				t.Fatalf("(%s) result = %d, but tc.wants = %d", tc.title, result, tc.wantsPart2)
+			}
+		})
 	}
 }
