@@ -51,21 +51,17 @@ func TestMazeRemoveBorder(t *testing.T) {
 
 func TestMazeAddBorderTwice(t *testing.T) {
 	m := NewMazeFromLines(sampleMaze, sampleKey)
-	t.Run("add_border_twice", func(t *testing.T) {
-		testutil.MustPanic(t, func() {
-			m.AddBorder(intEmpty)
-			m.AddBorder(intEmpty)
-		})
+	testutil.MustPanic(t, func() {
+		m.AddBorder(intEmpty)
+		m.AddBorder(intEmpty)
 	})
 }
 
 func TestMazeRemoveBorderTwice(t *testing.T) {
 	m := NewMazeFromLines(sampleMaze, sampleKey)
-	t.Run("remove_border_twice", func(t *testing.T) {
-		testutil.MustPanic(t, func() {
-			m.hasBorder = true
-			m.RemoveBorder()
-			m.RemoveBorder()
-		})
+	testutil.MustPanic(t, func() {
+		m.hasBorder = true
+		m.RemoveBorder()
+		m.RemoveBorder()
 	})
 }

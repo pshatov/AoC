@@ -21,22 +21,76 @@ var (
 	}
 )
 
-func TestLargestRectangle(t *testing.T) {
+func TestGetOuterLines(t *testing.T) {
+	innerLines := []util.LineXY{
+		{Begin: util.XY{X: -5, Y: -5}, End: util.XY{X: -10, Y: -5}},
+		{Begin: util.XY{X: -10, Y: -5}, End: util.XY{X: -10, Y: 5}},
+		{Begin: util.XY{X: -10, Y: 5}, End: util.XY{X: -5, Y: 5}},
+
+		{Begin: util.XY{X: -5, Y: 5}, End: util.XY{X: -5, Y: 10}},
+		{Begin: util.XY{X: -5, Y: 10}, End: util.XY{X: 5, Y: 10}},
+		{Begin: util.XY{X: 5, Y: 10}, End: util.XY{X: 5, Y: 5}},
+
+		{Begin: util.XY{X: 5, Y: 5}, End: util.XY{X: 10, Y: 5}},
+		{Begin: util.XY{X: 10, Y: 5}, End: util.XY{X: 10, Y: -5}},
+		{Begin: util.XY{X: 10, Y: -5}, End: util.XY{X: 5, Y: -5}},
+
+		{Begin: util.XY{X: 5, Y: -5}, End: util.XY{X: 5, Y: -10}},
+		{Begin: util.XY{X: 5, Y: -10}, End: util.XY{X: -5, Y: -10}},
+		{Begin: util.XY{X: -5, Y: -10}, End: util.XY{X: -5, Y: -5}},
+	}
+	want := []util.LineXY{
+		{Begin: util.XY{X: -6, Y: -6}, End: util.XY{X: -11, Y: -6}},
+		{Begin: util.XY{X: -11, Y: -6}, End: util.XY{X: -11, Y: 6}},
+		{Begin: util.XY{X: -11, Y: 6}, End: util.XY{X: -6, Y: 6}},
+
+		{Begin: util.XY{X: -6, Y: 6}, End: util.XY{X: -6, Y: 11}},
+		{Begin: util.XY{X: -6, Y: 11}, End: util.XY{X: 6, Y: 11}},
+		{Begin: util.XY{X: 6, Y: 11}, End: util.XY{X: 6, Y: 6}},
+
+		{Begin: util.XY{X: 6, Y: 6}, End: util.XY{X: 11, Y: 6}},
+		{Begin: util.XY{X: 11, Y: 6}, End: util.XY{X: 11, Y: -6}},
+		{Begin: util.XY{X: 11, Y: -6}, End: util.XY{X: 6, Y: -6}},
+
+		{Begin: util.XY{X: 6, Y: -6}, End: util.XY{X: 6, Y: -11}},
+		{Begin: util.XY{X: 6, Y: -11}, End: util.XY{X: -6, Y: -11}},
+		{Begin: util.XY{X: -6, Y: -11}, End: util.XY{X: -6, Y: -6}},
+	}
+	validateLines(innerLines)
+	validateLines(want)
+	result := getOuterLines(innerLines)
+	if len(result) != len(want) {
+		t.Fatalf("len(result) = %d, but len(want) = %d",
+			len(result), len(want))
+	}
+	for i := range result {
+		if result[i] != want[i] {
+			t.Fatalf("result[%d] = %v, but want[%d] = %v",
+				i, result[i], i, want[i])
+		}
+	}
+}
+
+func TestFindLargestRectangle(t *testing.T) {
 	tests := []struct {
-		data      testData
-		wantsArea int
+		data                           testData
+		wantsAreaPart1, wantsAreaPart2 int
 	}{
-		{exampleData, 50},
-		{inputData, 4758121828},
+		{exampleData, 50, 24},
+		{inputData, 4758121828, 1577956170},
 	}
 
 	for _, tc := range tests {
-		t.Run("FindLargestRectangle_"+tc.data.title, func(t *testing.T) {
-			area := FindLargestRectangle(tc.data.tiles)
-			if area != tc.wantsArea {
-				t.Fatalf(
-					"FindLargestRectangle(%s) result = %d, but tc.wantsArea = %d",
-					tc.data.title, area, tc.wantsArea)
+		t.Run("part1_"+tc.data.title, func(t *testing.T) {
+			area := FindLargestRectanglePart1(tc.data.tiles)
+			if area != tc.wantsAreaPart1 {
+				t.Fatalf("result = %d, but wants = %d", area, tc.wantsAreaPart1)
+			}
+		})
+		t.Run("part2_"+tc.data.title, func(t *testing.T) {
+			area := FindLargestRectanglePart2(tc.data.tiles)
+			if area != tc.wantsAreaPart2 {
+				t.Fatalf("result = %d, but wants = %d", area, tc.wantsAreaPart2)
 			}
 		})
 	}
