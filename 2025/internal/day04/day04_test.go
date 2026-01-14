@@ -6,8 +6,8 @@ import (
 )
 
 func TestCalcAccessibleRolls(t *testing.T) {
-	example := util.NewMaze(util.ReadAllLines("example.txt"), MazeKey)
-	input := util.NewMaze(util.ReadAllLines("input.txt"), MazeKey)
+	example := util.NewMazeFromLines(util.ReadAllLines("example.txt"), MazeKey)
+	input := util.NewMazeFromLines(util.ReadAllLines("input.txt"), MazeKey)
 
 	tests := []struct {
 		title                  string

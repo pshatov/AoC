@@ -15,7 +15,7 @@ func main() {
 	file := fmt.Sprintf("%s/%s/%s.txt", "../../internal", day04.DayNN, os.Args[1])
 	fmt.Printf("Using maze file '%s'\n", file)
 	lines := util.ReadAllLines(file)
-	maze := util.NewMaze(lines, day04.MazeKey)
+	maze := util.NewMazeFromLines(lines, day04.MazeKey)
 	fmt.Printf("Maze is %d rows x %d cols\n", maze.Dy(), maze.Dx())
 	_ = day04.RemoveAccessibleRolls(&maze)
 	maze.DebugPrint()

@@ -7,3 +7,7 @@ type XY struct {
 type XYZ struct {
 	X, Y, Z int
 }
+
+type LineXY struct {
+	A, B XY
+}

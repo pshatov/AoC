@@ -11,7 +11,7 @@ type Maze struct {
 	printKey  map[int]byte
 }
 
-func NewMaze(lines []string, key map[byte]int) Maze {
+func NewMazeFromLines(lines []string, key map[byte]int) Maze {
 	matrix := make([][]int, len(lines))
 	printKey := make(map[int]byte)
 	for k, v := range key {

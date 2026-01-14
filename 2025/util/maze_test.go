@@ -21,7 +21,7 @@ var sampleMaze = []string{
 var sampleKey = map[byte]int{'.': intEmpty}
 
 func TestMazeAddBorder(t *testing.T) {
-	m := NewMaze(sampleMaze, sampleKey)
+	m := NewMazeFromLines(sampleMaze, sampleKey)
 	m.AddBorder(intEmpty)
 	if m.dx != sampleDx+2 {
 		t.Fatalf("AddBorder(): dx = %d, but must be %d", m.dx, sampleDx+2)
@@ -35,7 +35,7 @@ func TestMazeAddBorder(t *testing.T) {
 }
 
 func TestMazeRemoveBorder(t *testing.T) {
-	m := NewMaze(sampleMaze, sampleKey)
+	m := NewMazeFromLines(sampleMaze, sampleKey)
 	m.hasBorder = true
 	m.RemoveBorder()
 	if m.dx != sampleDx-2 {
@@ -50,7 +50,7 @@ func TestMazeRemoveBorder(t *testing.T) {
 }
 
 func TestMazeAddBorderTwice(t *testing.T) {
-	m := NewMaze(sampleMaze, sampleKey)
+	m := NewMazeFromLines(sampleMaze, sampleKey)
 	t.Run("add_border_twice", func(t *testing.T) {
 		testutil.MustPanic(t, func() {
 			m.AddBorder(intEmpty)
@@ -60,7 +60,7 @@ func TestMazeAddBorderTwice(t *testing.T) {
 }
 
 func TestMazeRemoveBorderTwice(t *testing.T) {
-	m := NewMaze(sampleMaze, sampleKey)
+	m := NewMazeFromLines(sampleMaze, sampleKey)
 	t.Run("remove_border_twice", func(t *testing.T) {
 		testutil.MustPanic(t, func() {
 			m.hasBorder = true
